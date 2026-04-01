@@ -2,6 +2,8 @@
 
 This file provides a concise map of the repository and the purpose of key files and folders. The layout below matches the actual code in the repository.
 
+**← [Back to README](README.md) | [API Docs](docs/API.md) | [Setup Guide](docs/SETUP.md)**
+
 ---
 
 ## Root (selected files)

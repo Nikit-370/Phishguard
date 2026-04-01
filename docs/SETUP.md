@@ -2,6 +2,8 @@
 
 This document provides tested local setup steps that match the repository code and `requirements.txt` pins.
 
+**← [Back to README](../README.md) | [Project Structure](../PROJECT_STRUCTURE.md) | [API Reference](API.md)**
+
 ---
 
 ## System Requirements

@@ -1,102 +1,119 @@
 # 🛡️ PhishGuard — Phishing URL Detection System
 
-**Last Updated:** April 4, 2026
+**Last Updated:** April 4, 2026  
+**Status:** ✅ Ready State
 
-PhishGuard is a full-stack Flask web application that detects phishing URLs using a scikit-learn model. It provides an interactive web UI, user authentication, an admin panel, WHOIS enrichment, and persistent scan history.
-
----
+PhishGuard is a full-stack Flask web application that detects phishing URLs using a scikit-learn ML model. It provides an interactive web UI, user authentication, an admin panel, WHOIS enrichment, and persistent scan history.
 
 **Quick highlights**: ML-powered URL analysis, real-time scanning, WHOIS enrichment, user dashboard with history, admin tools, and a responsive UI.
 
 ---
 
-**Requirements**
+## 📚 Documentation Hub
 
-- Python 3.8+
-- pip
-- See `requirements.txt` for exact pinned packages used by the project (numpy, pandas, scikit-learn, Flask, etc.).
-
-**Important environment variables** (optional)
-
-- `SECRET_KEY` — Flask secret key (defaults to a development value if unset).
-- `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` — to use an external database instead of the local SQLite file.
-- Vercel detection: the app auto-uses `/tmp/phishguard.db` when Vercel env vars are present.
+- **[📁 Project Structure](PROJECT_STRUCTURE.md)** — Complete file/folder map and organization
+- **[🔌 API Reference](docs/API.md)** — All endpoints, authentication, and response formats
+- **[⚙️ Setup & Deployment](docs/SETUP.md)** — Local setup, training, and production deployment
 
 ---
 
-## Installation (local)
+## ⚡ Quick Start
 
-1. Create and activate a virtual environment
+### Requirements
+- Python 3.8+
+- pip
+- ~1GB disk space
 
-Windows:
+### Installation
 
-```powershell
-python -m venv venv
-venv\Scripts\activate
-```
-
-macOS / Linux:
+1. **Clone and setup virtual environment:**
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+git clone https://github.com/Nikit-370/Phishguard.git
+cd Phishguard
+python -m venv venv
+venv\Scripts\activate  # Windows
+# or
+source venv/bin/activate  # macOS/Linux
 ```
 
-2. Install dependencies
+2. **Install dependencies:**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. (Optional) Train the model using a dataset placed in `dataset/`
-
-```bash
-python ml/train_model.py
-```
-
-The trained model will be written to `model/phishing_model.pkl`.
-
-4. Start the app locally
+3. **Start the app:**
 
 ```bash
 python app.py
 ```
 
-The development server runs on http://localhost:5000 by default. On first run, the app automatically creates `instance/phishguard.db` (SQLite database) and tables. The ML model is loaded on the first detection request (lazy loading).
+The app runs on **http://localhost:5000**. Database (`instance/phishguard.db`) is auto-created on first run.
 
 ---
 
-## Project layout
+## 🚀 Basic Usage
 
-See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for a detailed file/folder map. Key folders:
+### Register + Login
+```bash
+POST /api/auth/register
+{
+  "username": "user",
+  "email": "user@example.com",
+  "password": "securepass"
+}
+```
 
-- `app.py` — main Flask application and API endpoints (serves web UI + JSON API)
-- `ml/` — feature extraction and training scripts (`features.py`, `train_model.py`)
-- `model/` — trained model artifacts (`phishing_model.pkl`)
-- `utils/` — `database.py`, `security.py` helpers
-- `templates/`, `static/` — front-end templates and assets
+### Detect Phishing URL
+```bash
+POST /api/detect
+{
+  "url": "https://example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "prediction": 0,
+  "confidence": 0.95,
+  "features": {...},
+  "whois": {...}
+}
+```
 
 ---
 
-## API & Usage
+## 📖 For More Information
 
-Basic endpoints (see `docs/API.md` for full reference):
-
-- `POST /api/auth/register` — register user
-- `GET /api/auth/verify` — verify token (requires auth)
-- `POST /api/detect` — run phishing detection (requires auth), body: `{ "url": "https://example.com" }`
-
-Responses include prediction (0 = legitimate, 1 = phishing), confidence, extracted features, WHOIS data, and HTTP resolution metadata.
+- **Setup & Deployment Details** → See [docs/SETUP.md](docs/SETUP.md)
+- **Complete API Reference** → See [docs/API.md](docs/API.md)
+- **Project Structure** → See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
+- **Training the Model** → See [docs/SETUP.md#training](docs/SETUP.md#model-training)
 
 ---
 
-## Notes
+## 💡 Key Technologies
 
-- The app creates an `instance/phishguard.db` SQLite file by default when run locally.
-- Logs are written to `logs/app.log`.
-- Training expects a CSV/XLSX file placed in `dataset/` containing a URL column and a label column.
+- **Backend:** Flask, SQLAlchemy, Flask-CORS, Flask-JWT
+- **ML:** scikit-learn, pandas, numpy
+- **Frontend:** HTML5, CSS3, JavaScript
+- **Database:** SQLite (local), Postgres (production)
+- **Deployment:** Vercel
 
-Demo database (easy note): The built-in SQLite database is for demo and testing only. When you try the live demo (for example on Vercel) the database is temporary and changes will not be saved long-term — this means user accounts, edits, and scan history are shown only as a demonstration. To use the app with persistent storage or to manage users and edits safely, clone this repository and run it locally with a real database, or host a separate database server (Postgres, MySQL, Vercel Postgres, Supabase) and set `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` before starting the app.
+---
+
+## ℹ️ Notes
+
+- Database is auto-created on first run
+- Logs are written to `logs/app.log`
+- Trained ML model included (`model/phishing_model.pkl`)
+- Optional: Train custom model with `python ml/train_model.py`
+
+---
+
+**For comprehensive setup, API documentation, and deployment instructions, please refer to the documentation links above.**
 
 If you want, I can add step-by-step instructions to configure a managed database (Postgres/Supabase) and update the app to use it.
 

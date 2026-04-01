@@ -2,7 +2,9 @@
 
 Complete API reference for the PhishGuard Phishing URL Detection System.
 
-> Note: The application chooses the database backend at startup. Locally it uses `instance/phishguard.db`; on Vercel it uses `/tmp/phishguard.db` (ephemeral). You can also provide `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` to point to a managed database. See `docs/SETUP.md` for details.
+**← [Back to README](../README.md) | [Project Structure](../PROJECT_STRUCTURE.md) | [Setup Guide](SETUP.md)**
+
+> Note: The application chooses the database backend at startup. Locally it uses `instance/phishguard.db`; on Vercel it uses `/tmp/phishguard.db` (ephemeral). You can also provide `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` to point to a managed database. See [Setup Guide](SETUP.md) for details.
 
 ---
 
