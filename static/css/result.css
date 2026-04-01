@@ -1,0 +1,258 @@
+/* ═══════════════════════════════════════════════════════════
+   PhishGuard — Scan Result Page
+   ═══════════════════════════════════════════════════════════ */
+
+.result-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem;
+    margin: 4rem auto;
+    max-width: 780px;
+    color: var(--text-main);
+    animation: fadeUp 0.5s ease-out;
+}
+
+/* ── Header ── */
+.result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.result-icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.result-status {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.result-phishing .result-status,
+.result-phishing .result-icon { color: var(--danger); }
+
+.result-legitimate .result-status,
+.result-legitimate .result-icon { color: var(--success); }
+
+/* ── URL Display ── */
+.url-display {
+    padding: 1.25rem;
+    background: var(--surface-3);
+    border-radius: 0.85rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.url-display small {
+    color: var(--text-faint);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+}
+
+.url-display div,
+.url-display code {
+    word-break: break-all;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.9rem;
+    margin-top: 0.4rem;
+    color: var(--text-main);
+    display: block;
+}
+
+/* ── Confidence ── */
+.confidence-score {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    background: var(--surface-3);
+    border-radius: 0.85rem;
+    border: 1px solid var(--border-color);
+}
+
+.confidence-value {
+    font-size: 2rem;
+    font-weight: 800;
+    min-width: 90px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 10px var(--glow-primary));
+}
+
+.confidence-score .progress {
+    flex: 1;
+    height: 12px;
+    border-radius: 10px;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.confidence-score .progress-bar {
+    background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Features Grid ── */
+.features-section {
+    margin-top: 2rem;
+}
+
+.features-section h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.feature-item {
+    background: var(--surface-3);
+    padding: 0.85rem 1rem;
+    border-radius: 0.75rem;
+    border-left: 3px solid var(--primary);
+    transition: all 0.25s ease;
+}
+
+.feature-item:hover {
+    background: var(--card-bg-deep);
+    transform: translateX(3px);
+}
+
+.feature-label {
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.feature-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-top: 0.15rem;
+}
+
+/* ── Safety Tips ── */
+.safety-tips {
+    padding: 1.5rem;
+    border-radius: 1rem;
+    margin-top: 2rem;
+    background: var(--surface-3);
+    border: 1px solid var(--border-color);
+}
+
+.result-phishing .safety-tips {
+    border-left: 4px solid var(--danger);
+}
+
+.result-legitimate .safety-tips {
+    border-left: 4px solid var(--success);
+}
+
+.safety-tips h4 {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.safety-tips ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.safety-tips li {
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* ── Action Buttons ── */
+.btn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.85rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    font-size: 0.92rem;
+}
+
+.btn-primary-action {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+}
+
+.btn-primary-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--glow-primary);
+    color: white;
+}
+
+.btn-secondary-action {
+    background: transparent;
+    color: var(--primary-light);
+    border: 1.5px solid var(--primary-light);
+}
+
+.btn-secondary-action:hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* ── Error State ── */
+.error-alert {
+    text-align: center;
+    padding: 2rem;
+}
+
+.error-alert h2 {
+    color: var(--danger);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.error-alert p {
+    color: var(--text-muted);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .result-card { padding: 1.5rem; margin: 2rem 1rem; }
+    .confidence-score { flex-direction: column; text-align: center; }
+    .btn-group { flex-direction: column; }
+}

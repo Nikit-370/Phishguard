@@ -1,0 +1,314 @@
+# 🛡️ PhishGuard — Phishing URL Detection System
+
+**Last Updated:** April 4, 2026
+
+PhishGuard is a full-stack Flask web application that detects phishing URLs using a scikit-learn model. It provides an interactive web UI, user authentication, an admin panel, WHOIS enrichment, and persistent scan history.
+
+---
+
+**Quick highlights**: ML-powered URL analysis, real-time scanning, WHOIS enrichment, user dashboard with history, admin tools, and a responsive UI.
+
+---
+
+**Requirements**
+
+- Python 3.8+
+- pip
+- See `requirements.txt` for exact pinned packages used by the project (numpy, pandas, scikit-learn, Flask, etc.).
+
+**Important environment variables** (optional)
+
+- `SECRET_KEY` — Flask secret key (defaults to a development value if unset).
+- `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` — to use an external database instead of the local SQLite file.
+- Vercel detection: the app auto-uses `/tmp/phishguard.db` when Vercel env vars are present.
+
+---
+
+## Installation (local)
+
+1. Create and activate a virtual environment
+
+Windows:
+
+```powershell
+python -m venv venv
+venv\Scripts\activate
+```
+
+macOS / Linux:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+3. (Optional) Train the model using a dataset placed in `dataset/`
+
+```bash
+python ml/train_model.py
+```
+
+The trained model will be written to `model/phishing_model.pkl`.
+
+4. Start the app locally
+
+```bash
+python app.py
+```
+
+The development server runs on http://localhost:5000 by default. On first run, the app automatically creates `instance/phishguard.db` (SQLite database) and tables. The ML model is loaded on the first detection request (lazy loading).
+
+---
+
+## Project layout
+
+See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for a detailed file/folder map. Key folders:
+
+- `app.py` — main Flask application and API endpoints (serves web UI + JSON API)
+- `ml/` — feature extraction and training scripts (`features.py`, `train_model.py`)
+- `model/` — trained model artifacts (`phishing_model.pkl`)
+- `utils/` — `database.py`, `security.py` helpers
+- `templates/`, `static/` — front-end templates and assets
+
+---
+
+## API & Usage
+
+Basic endpoints (see `docs/API.md` for full reference):
+
+- `POST /api/auth/register` — register user
+- `GET /api/auth/verify` — verify token (requires auth)
+- `POST /api/detect` — run phishing detection (requires auth), body: `{ "url": "https://example.com" }`
+
+Responses include prediction (0 = legitimate, 1 = phishing), confidence, extracted features, WHOIS data, and HTTP resolution metadata.
+
+---
+
+## Notes
+
+- The app creates an `instance/phishguard.db` SQLite file by default when run locally.
+- Logs are written to `logs/app.log`.
+- Training expects a CSV/XLSX file placed in `dataset/` containing a URL column and a label column.
+
+Demo database (easy note): The built-in SQLite database is for demo and testing only. When you try the live demo (for example on Vercel) the database is temporary and changes will not be saved long-term — this means user accounts, edits, and scan history are shown only as a demonstration. To use the app with persistent storage or to manage users and edits safely, clone this repository and run it locally with a real database, or host a separate database server (Postgres, MySQL, Vercel Postgres, Supabase) and set `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` before starting the app.
+
+If you want, I can add step-by-step instructions to configure a managed database (Postgres/Supabase) and update the app to use it.
+
+If you want, I can now update `docs/SETUP.md` and `PROJECT_STRUCTURE.md` to match these exact commands and the pinned dependencies in `requirements.txt`.
+
+### 4. Run the Application
+
+```bash
+python app.py
+```
+
+The server starts at **http://localhost:5000**.
+
+---
+
+## 🔐 Default Credentials
+
+| Username | Password   | Role  |
+|----------|-----------|-------|
+| `admin`  | `admin123` | Admin |
+| `root`   | `root123`  | User  |
+
+> These accounts are auto-seeded by `init_db()` if they don't exist.
+
+---
+
+## 🌐 API Endpoints
+
+### Authentication
+| Method | Endpoint             | Auth | Description              |
+|--------|----------------------|------|--------------------------|
+| POST   | `/api/auth/register` | —    | Register a new user      |
+| GET    | `/api/auth/verify`   | Basic | Verify credentials       |
+
+### Phishing Detection
+| Method | Endpoint       | Auth  | Description                    |
+|--------|---------------|-------|--------------------------------|
+| POST   | `/api/detect`  | Basic | Analyze URL for phishing       |
+
+### History & Stats
+| Method | Endpoint                | Auth  | Description                     |
+|--------|------------------------|-------|---------------------------------|
+| GET    | `/api/history`          | Basic | Get user's scan history         |
+| DELETE | `/api/history/<id>`     | Basic | Delete a specific history item  |
+| POST   | `/api/history/clear`    | Basic | Clear all user history          |
+| GET    | `/api/stats`            | Basic | Get detection stats             |
+
+### Admin (requires admin role)
+| Method | Endpoint                           | Auth  | Description                |
+|--------|------------------------------------|-------|----------------------------|
+| GET    | `/api/admin/users`                 | Basic | List all users             |
+| GET    | `/api/admin/users/<id>`            | Basic | Get user details           |
+| PUT    | `/api/admin/users/<id>`            | Basic | Update user details        |
+| GET    | `/api/admin/users/<id>/history`    | Basic | Get user's scan history    |
+| GET    | `/api/admin/logs`                  | Basic | Get system logs            |
+
+### Web Pages
+| Route        | Page             |
+|-------------|------------------|
+| `/`          | Landing page     |
+| `/login`     | Login & signup   |
+| `/dashboard` | User dashboard   |
+| `/admin`     | Admin panel      |
+
+---
+
+## 🤖 ML Features Extracted (17)
+
+| Feature               | Description                               |
+|-----------------------|-------------------------------------------|
+| `url_length`          | Total character length of the URL         |
+| `has_ip`              | URL contains an IP address                |
+| `has_at`              | Presence of `@` symbol                    |
+| `has_redirect`        | Contains `//` redirect pattern            |
+| `https`               | Uses HTTPS protocol                       |
+| `dot_count`           | Number of dots in the URL                 |
+| `hyphen_count`        | Number of hyphens                         |
+| `port_present`        | Non-standard port specified               |
+| `subdomain_count`     | Number of subdomains                      |
+| `special_char_count`  | Count of special characters               |
+| `digit_count`         | Number of digits in the URL               |
+| `has_query_string`    | Presence of query parameters              |
+| `path_length`         | Length of the URL path                    |
+| `domain_length`       | Length of the domain name                 |
+| `is_encoded`          | Contains URL-encoded characters           |
+| `entropy`             | Shannon entropy of the URL string         |
+| `suspicious_words_count` | Count of phishing-related keywords     |
+
+---
+
+## 🎨 Design System
+
+The CSS architecture uses a **global design token system** in `style.css` with CSS custom properties:
+
+- **Theming**: `[data-theme="dark"]` / `[data-theme="light"]` with 30+ CSS variables
+- **Components**: Glass panels, premium buttons, toggle switches, icon circles, badges
+- **Shared**: Input groups, modals, toasts, tables, and icon buttons are in `style.css` for cross-page consistency
+- **Page-specific**: Each page has its own CSS file for unique elements (orbs, activity streams, etc.)
+
+---
+
+## 🔧 Configuration
+
+| Setting               | Location       | Default                              |
+|-----------------------|---------------|--------------------------------------|
+| Database URI          | `app.py`       | Auto-detected: `instance/phishguard.db` (local) or `/tmp/phishguard.db` (Vercel) |
+| Secret Key            | `app.py:77`    | `phishing-system-secret-key-...`     |
+| Model Path            | `config.py:7`  | `model/phishing_model.pkl`           |
+| Log File              | `config.py:9`  | `logs/app.log`                       |
+| Max URL Length         | `config.py:11` | `2000` characters                    |
+
+> ⚠️ Change `SECRET_KEY` before deploying to production.
+
+---
+
+## 🚢 Deployment & Database (Vercel)
+
+This project uses SQLite for local development and an environment-aware path for deployments on Vercel.
+
+- Behavior: on startup the app checks for common Vercel environment variables (`VERCEL`, `VERCEL_ENV`, `VERCEL_URL`). If present the app will use `/tmp/phishguard.db` as the SQLite file. Otherwise it creates and uses `instance/phishguard.db` in the project root.
+- Location of logic: see `app.py` (the `_get_database_uri()` helper) and `utils/database.py` (`get_sqlite_path()` and `get_sqlite_connection()`).
+
+Important caveats:
+- Vercel's filesystem is ephemeral. Files written to `/tmp` are temporary and not suitable for persistent production storage. Data will be lost between deployments or cold starts.
+- Multiple instances/functions do not share the same `/tmp` file. Concurrent or scaled deployments will have inconsistent local state.
+
+Recommendations:
+- For production use, switch to a managed database (Postgres, MySQL, Vercel Postgres, Supabase). You can then set a `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` environment variable and update `app.py` to use it instead of SQLite. I can add this optional fallback if you'd like.
+- The app also supports an explicit `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` environment variable. If set, the application will use that value preferentially. If initialization fails (bad URL or filesystem errors), the app will attempt to fall back to an in-memory SQLite database to keep the app running for testing.
+- Use SQLite only for local development, demos, or small single-instance deployments.
+
+Quick verification
+
+- Run locally and confirm the DB file is created:
+
+```powershell
+python app.py
+Get-ChildItem .\instance\phishguard.db
+```
+
+- Deploy to Vercel and verify logs contain the message `Using database at: /tmp/phishguard.db` (the app prints the chosen path at startup). Test endpoints to confirm DB writes succeed (remember data is ephemeral on Vercel).
+
+Raw sqlite helper example (included): `utils/database.py` provides `sample_insert_raw_log()` and `get_sqlite_connection()` for quick manual inserts and tests.
+
+### Vercel Deploy Checklist
+
+Follow these minimal steps to deploy this app on Vercel (serverless):
+
+- Ensure `vercel.json`, `api/index.py`, and `vercel-wsgi` are present (they are added in this repo).
+- Add required environment variables in the Vercel project settings: at minimum `SECRET_KEY`. Add `DATABASE_URL` if you plan to use an external DB.
+- Deploy from the repository root (the folder containing `vercel.json`) with:
+
+```bash
+vercel --prod
+```
+
+- After deployment, open `https://<your-deployment-url>/health` to confirm the app is running and DB selection shows `on_vercel: true` or indicates `/tmp` usage.
+- Check Vercel function logs for startup errors and for the printed DB path.
+
+Notes:
+- Local `instance/` files are ignored on Vercel — use `/tmp` or `DATABASE_URL`.
+- Prefer a managed DB (Postgres, Vercel Postgres, Supabase) for production; set `DATABASE_URL` accordingly.
+
+---
+
+## 📦 Dependencies
+
+```
+flask==2.3.3
+flask-cors==4.0.0
+flask-sqlalchemy==3.0.5
+pandas==2.0.3
+numpy==1.24.3
+scikit-learn==1.3.0
+requests==2.31.0
+werkzeug==2.3.7
+python-dotenv==1.0.0
+python-whois==0.9.4
+```
+
+
+---
+
+## Deployment
+
+This project is deployed on Vercel. The Flask app auto-detects Vercel environment variables and uses an ephemeral SQLite database at `/tmp/phishguard.db` when running on Vercel. For persistent storage in production, provide a managed database by setting `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI`.
+
+Quick Vercel steps:
+
+1. Install the Vercel CLI (optional):
+
+```bash
+npm i -g vercel
+```
+
+2. From the project root, login and deploy:
+
+```bash
+vercel login
+vercel --prod
+```
+
+3. In the Vercel dashboard, add any environment variables you need (for example `SECRET_KEY`, or a managed `DATABASE_URL` to persist data).
+
+Notes:
+- Vercel's filesystem is ephemeral; do not rely on `instance/phishguard.db` for long-term storage on Vercel.
+- The app contains logic to fall back to an in-memory DB if initialization fails; for production use a managed DB.
+
+---
+
+## 📝 License
+
+This project is released under the MIT License — see the `LICENSE` file in the repository for the full text. In short, you are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, provided that the original copyright and license notice are included in all copies or substantial portions of the Software.
+
+If you want I can also add the full `LICENSE` file to the repo now.

@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════════════════════
+   PhishGuard — Authentication Page
+   ═══════════════════════════════════════════════════════════ */
+
+.auth-container {
+    width: 100%;
+    max-width: 460px;
+    padding: 2rem;
+    animation: fadeUp 0.5s ease-out;
+}
+
+.auth-container .glass {
+    border-radius: 1.75rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg), 0 0 80px -20px var(--glow-primary);
+}
+
+/* ── Form Labels ── */
+.form-label,
+.auth-container label {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ── Input Overrides ── */
+.auth-container .detector-input-group {
+    background: var(--surface-3);
+    border: 1px solid var(--border-color);
+    border-radius: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.auth-container .detector-input-group:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.auth-container .detector-input-group input {
+    font-size: 0.95rem;
+    padding: 0.65rem 0.8rem;
+}
+
+/* ── Form Control (standard) ── */
+.form-control {
+    background: var(--surface-3) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 0.85rem !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-soft) !important;
+}
+
+/* ── Password Strength ── */
+.strength-bar-bg {
+    height: 5px;
+    background: var(--surface-3);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: all 0.3s ease;
+    border-radius: 3px;
+}
+
+.strength-text {
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 0.3rem;
+}
+
+/* ── Alerts ── */
+.auth-container .alert {
+    border-radius: 0.85rem;
+    font-size: 0.88rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid;
+}
+
+.auth-container .alert-danger {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+}
+
+.auth-container .alert-success {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.2);
+    color: var(--success);
+}
+
+/* ── Password Toggle ── */
+.pw-toggle {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+    transition: color 0.25s ease, background 0.25s ease;
+    flex-shrink: 0;
+}
+
+.pw-toggle:hover {
+    color: var(--primary);
+    background: var(--primary-soft);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .auth-container { padding: 1rem; }
+    .auth-container .glass { padding: 2rem !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Split Login Layout
+   ═══════════════════════════════════════════════════════════ */
+
+.login-split-container {
+    display: flex;
+    width: 100%;
+    max-width: 960px;
+    min-height: 600px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.6s ease-out;
+}
+
+.login-brand-panel {
+    flex: 0 0 380px;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-2);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-right: 1px solid var(--border-color);
+    border-radius: 1.75rem 0 0 1.75rem;
+    padding: 3.5rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-brand-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, var(--glow-primary), transparent 60%, var(--glow-accent));
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.brand-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.login-form-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login-form-panel .auth-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 0;
+}
+
+/* ── Feature List ── */
+.login-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.login-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem;
+    border-radius: 0.85rem;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.login-feature-item:hover {
+    background: var(--surface-3);
+    transform: translateX(4px);
+}
+
+.login-feature-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 0.65rem;
+    background: var(--primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-light);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* ── Animated Background Blobs ── */
+.login-bg-effects {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.25;
+}
+
+[data-theme="light"] .blob {
+    opacity: 0.15;
+}
+
+.blob-1 {
+    width: 400px; height: 400px;
+    background: var(--primary);
+    top: -100px; right: -100px;
+    animation: blobFloat1 12s ease-in-out infinite;
+}
+
+.blob-2 {
+    width: 300px; height: 300px;
+    background: var(--secondary);
+    bottom: -80px; left: -80px;
+    animation: blobFloat2 15s ease-in-out infinite;
+}
+
+.blob-3 {
+    width: 250px; height: 250px;
+    background: var(--accent);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: blobFloat3 10s ease-in-out infinite;
+}
+
+@keyframes blobFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-40px, 60px) scale(1.1); }
+    66% { transform: translate(30px, -30px) scale(0.95); }
+}
+
+@keyframes blobFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(50px, -40px) scale(1.05); }
+    66% { transform: translate(-30px, 30px) scale(1.1); }
+}
+
+@keyframes blobFloat3 {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -55%) scale(1.15); }
+}
+
+/* ── Responsive: Stack on tablet ── */
+@media (max-width: 991.98px) {
+    .login-split-container {
+        max-width: 480px;
+        flex-direction: column;
+    }
+    .login-brand-panel {
+        display: none !important;
+    }
+    .login-form-panel {
+        padding: 2rem 1rem;
+    }
+}

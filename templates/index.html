@@ -1,0 +1,1349 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhishGuard - URL Phishing Detection System</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+    <script>
+      (function () {
+        var t = localStorage.getItem("theme") || "dark";
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="nav-shell navbar py-3" id="main-navbar">
+      <div class="container d-flex align-items-center justify-content-between">
+        <a
+          href="/"
+          class="logo text-decoration-none d-flex align-items-center gap-2"
+        >
+          <i class="fas fa-shield-alt text-primary-light"></i>
+          <span class="logo-text"
+            >PhishGuard
+            <span
+              class="d-none d-md-inline"
+              style="font-size: 0.5em; opacity: 0.7"
+              >URL Phishing Detection System</span
+            ></span
+          >
+        </a>
+        <div class="d-flex align-items-center gap-4">
+          <ul
+            class="nav-links d-none d-md-flex align-items-center mb-0 list-unstyled"
+          >
+            <li><a href="/" class="nav-link active">Scanner</a></li>
+            <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+            <li id="admin-link" style="display: none">
+              <a href="/admin" class="nav-link">Admin</a>
+            </li>
+          </ul>
+          <div class="d-flex align-items-center gap-3">
+            <button
+              class="btn-ghost p-2"
+              id="theme-toggle"
+              onclick="toggleTheme()"
+              title="Toggle Theme"
+            >
+              <i class="fas fa-moon"></i>
+            </button>
+            <span
+              id="user-greeting"
+              class="text-muted small d-none d-md-inline"
+            ></span>
+            <button
+              class="btn-ghost"
+              id="login-btn"
+              onclick="window.location.href = '/login'"
+              style="display: none"
+            >
+              Sign In
+            </button>
+            <button
+              class="btn-premium py-2 px-3 small"
+              id="logout-btn"
+              onclick="handleLogout()"
+              style="display: none; font-size: 0.8rem"
+            >
+              <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </button>
+            <button
+              class="hamburger-btn"
+              onclick="toggleMobileNav()"
+              aria-label="Toggle navigation"
+            >
+              <span></span><span></span><span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Drawer -->
+      <div class="mobile-nav-drawer">
+        <ul class="mobile-nav-list">
+          <li>
+            <a href="/" class="active"><i class="fas fa-search"></i> Scanner</a>
+          </li>
+          <li>
+            <a href="/dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a>
+          </li>
+          <li id="mobile-admin-link" style="display: none">
+            <a href="/admin"><i class="fas fa-user-shield"></i> Admin</a>
+          </li>
+        </ul>
+        <div class="mobile-nav-divider"></div>
+        <div class="mobile-nav-actions">
+          <span
+            class="mobile-greeting"
+            id="mobile-greeting"
+            style="display: none"
+          ></span>
+          <button
+            class="btn-ghost w-100 text-start"
+            id="mobile-login-btn"
+            onclick="window.location.href = '/login'"
+          >
+            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+          </button>
+          <button
+            class="btn-premium w-100"
+            id="mobile-logout-btn"
+            onclick="handleLogout()"
+            style="display: none"
+          >
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- About Section -->
+    <!-- <section id="about" class="py-5">
+      <div class="container">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-6">
+            <div class="metric-pill mb-3">
+              <i class="fas fa-info-circle"></i> About This Project
+            </div>
+            <h2 class="h1 font-black mb-3">What is PhishGuard?</h2>
+            <p class="text-muted mb-3">
+              PhishGuard URL Phishing Detection System is an AI-powered web
+              application designed to protect users from phishing websites. It
+              uses machine learning to analyze URLs in real-time and classify
+              them as safe or malicious.
+            </p>
+            <p class="text-muted mb-4">
+              Built as a full-stack project combining Flask (Python),
+              scikit-learn for ML, and a modern glassmorphic UI. The system
+              performs WHOIS lookups, DNS resolution, and extracts 12+ features
+              from each URL to make accurate predictions.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge-premium" style="font-size: 0.75rem"
+                ><i class="fab fa-python me-1"></i> Python</span
+              >
+              <span class="badge-premium" style="font-size: 0.75rem"
+                ><i class="fas fa-flask me-1"></i> Flask</span
+              >
+              <span class="badge-premium" style="font-size: 0.75rem"
+                ><i class="fas fa-robot me-1"></i> scikit-learn</span
+              >
+              <span class="badge-premium" style="font-size: 0.75rem"
+                ><i class="fas fa-database me-1"></i> SQLite</span
+              >
+              <span class="badge-premium" style="font-size: 0.75rem"
+                ><i class="fab fa-js me-1"></i> JavaScript</span
+              >
+              <span class="badge-premium" style="font-size: 0.75rem"
+                ><i class="fab fa-bootstrap me-1"></i> Bootstrap 5</span
+              >
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="glass p-4 rounded-3xl">
+              <h5 class="font-bold mb-3">
+                <i class="fas fa-shield-alt text-primary-light me-2"></i>Key
+                Capabilities
+              </h5>
+              <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-start gap-3">
+                  <i
+                    class="fas fa-check-circle mt-1"
+                    style="color: var(--success)"
+                  ></i>
+                  <div>
+                    <strong>Real-time ML Detection</strong><br /><span
+                      class="text-muted small"
+                      >Trained Random Forest model classifies URLs with high
+                      accuracy and provides confidence scores.</span
+                    >
+                  </div>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                  <i
+                    class="fas fa-check-circle mt-1"
+                    style="color: var(--success)"
+                  ></i>
+                  <div>
+                    <strong>Domain WHOIS Analysis</strong><br /><span
+                      class="text-muted small"
+                      >Checks domain registration age, registrar, creation and
+                      expiry dates for suspicious patterns.</span
+                    >
+                  </div>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                  <i
+                    class="fas fa-check-circle mt-1"
+                    style="color: var(--success)"
+                  ></i>
+                  <div>
+                    <strong>User Dashboard & History</strong><br /><span
+                      class="text-muted small"
+                      >Personal scan history, detection stats, and exportable
+                      data for every registered user.</span
+                    >
+                  </div>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                  <i
+                    class="fas fa-check-circle mt-1"
+                    style="color: var(--success)"
+                  ></i>
+                  <div>
+                    <strong>Admin Control Panel</strong><br /><span
+                      class="text-muted small"
+                      >User management, system logs, role-based access, and
+                      ability to register new users.</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section> -->
+
+<section id="about" class="py-5">
+  <div class="container">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6">
+        <div class="metric-pill mb-3">
+          <i class="fas fa-info-circle"></i> About This Project
+        </div>
+        <h2 class="h1 font-black mb-3">What is PhishGuard?</h2>
+        <p class="text-muted mb-3">
+          PhishGuard URL Phishing Detection System is an AI-powered web
+          application designed to protect users from phishing websites. It
+          uses machine learning to analyze URLs in real-time and classify
+          them as safe or malicious.
+        </p>
+        <p class="text-muted mb-4">
+          Built as a full-stack project combining Flask (Python),
+          scikit-learn for ML, and a modern glassmorphic UI. The system
+          performs WHOIS lookups, DNS resolution, and extracts 12+ features
+          from each URL to make accurate predictions.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="badge-premium" style="font-size: 0.75rem">
+            <i class="fab fa-python me-1"></i> Python
+          </span>
+          <span class="badge-premium" style="font-size: 0.75rem">
+            <i class="fas fa-flask me-1"></i> Flask
+          </span>
+          <span class="badge-premium" style="font-size: 0.75rem">
+            <i class="fas fa-robot me-1"></i> scikit-learn
+          </span>
+          <span class="badge-premium" style="font-size: 0.75rem">
+            <i class="fas fa-database me-1"></i> SQLite
+          </span>
+          <span class="badge-premium" style="font-size: 0.75rem">
+            <i class="fab fa-js me-1"></i> JavaScript
+          </span>
+          <span class="badge-premium" style="font-size: 0.75rem">
+            <i class="fab fa-bootstrap me-1"></i> Bootstrap 5
+          </span>
+        </div>
+
+<!-- Enhanced Collaboration Section with Buttons Aligned Right -->
+<div class="mt-4">
+  <h6 class="font-bold mb-2">
+    <i class="fas fa-users text-primary-light me-2"></i>
+    Project Collaboration
+  </h6>
+
+  <p class="text-muted small mb-3">
+    PhishGuard is proudly developed as an <strong>MCA Final Year Project</strong>, 
+    representing a collaborative innovation in cybersecurity and machine learning.
+    This system reflects the combined technical expertise, research effort, and 
+    full-stack development skills of:
+  </p>
+
+  <div class="d-flex flex-column gap-3">
+
+    <!-- First Contributor (aligned button right) -->
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <strong>Nikit Singh Kanyal</strong><br />
+        <span class="text-muted small">
+          AI Model Development, Backend Architecture & System Integration
+        </span>
+      </div>
+      <div class="ms-auto">
+          <a href="https://github.com/Nikit-370/" target="_blank" 
+            class="btn btn-sm btn-outline-premium">
+          <i class="fab fa-github me-1"></i> Visit Profile
+        </a>
+      </div>
+    </div>
+
+    <!-- Second Contributor (aligned button right) -->
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <strong>Vaibhav Vishwakarma</strong><br />
+        <span class="text-muted small">
+          Frontend Engineering, Database Design & Application Deployment
+        </span>
+      </div>
+      <div class="ms-auto">
+          <a href="https://github.com/Vaibhav-1922/" target="_blank" 
+            class="btn btn-sm btn-outline-premium">
+          <i class="fab fa-github me-1"></i> Visit Profile
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- End Collaboration Section -->
+
+      </div>
+
+      <div class="col-lg-6">
+        <div class="glass p-4 rounded-3xl">
+          <h5 class="font-bold mb-3">
+            <i class="fas fa-shield-alt text-primary-light me-2"></i>Key
+            Capabilities
+          </h5>
+          <div class="d-flex flex-column gap-3">
+            <div class="d-flex align-items-start gap-3">
+              <i
+                class="fas fa-check-circle mt-1"
+                style="color: var(--success)"
+              ></i>
+              <div>
+                <strong>Real-time ML Detection</strong><br />
+                <span class="text-muted small">
+                  Trained Random Forest model classifies URLs with high
+                  accuracy and provides confidence scores.
+                </span>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <i
+                class="fas fa-check-circle mt-1"
+                style="color: var(--success)"
+              ></i>
+              <div>
+                <strong>Domain WHOIS Analysis</strong><br />
+                <span class="text-muted small">
+                  Checks domain registration age, registrar, creation and
+                  expiry dates for suspicious patterns.
+                </span>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <i
+                class="fas fa-check-circle mt-1"
+                style="color: var(--success)"
+              ></i>
+              <div>
+                <strong>User Dashboard & History</strong><br />
+                <span class="text-muted small">
+                  Personal scan history, detection stats, and exportable
+                  data for every registered user.
+                </span>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <i
+                class="fas fa-check-circle mt-1"
+                style="color: var(--success)"
+              ></i>
+              <div>
+                <strong>Admin Control Panel</strong><br />
+                <span class="text-muted small">
+                  User management, system logs, role-based access, and
+                  ability to register new users.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container text-center">
+        <div class="metric-pill mb-4">
+          <i class="fas fa-shield-virus"></i> Advanced AI Protection
+        </div>
+        <h1>
+          Secure Your Digital <span class="gradient-text">Frontier.</span>
+        </h1>
+        <p class="lead mx-auto">
+          This system uses state-of-the-art machine learning to analyze URLs in
+          real-time, protecting you from sophisticated phishing attacks.
+        </p>
+
+        <div class="detector-container max-w-2xl mx-auto mt-5">
+          <div class="glass p-4 rounded-3xl">
+            <form id="detectionForm">
+              <!-- Protocol & WWW Toggles -->
+              <div class="toggle-row d-flex align-items-center gap-4 mb-3 px-2">
+                <label class="toggle-switch" title="Use HTTPS">
+                  <input type="checkbox" id="httpsToggle" checked />
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">HTTPS</span>
+                </label>
+                <label class="toggle-switch" title="Add www prefix">
+                  <input type="checkbox" id="wwwToggle" />
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">www.</span>
+                </label>
+                <span
+                  class="url-preview text-muted small ms-auto"
+                  id="urlPreview"
+                  >https://</span
+                >
+              </div>
+              <!-- Domain Input -->
+              <div class="detector-input-group">
+                <i class="fas fa-globe ms-3 text-muted"></i>
+                <input
+                  type="text"
+                  id="urlInput"
+                  placeholder="Enter domain (e.g., example.com/path)"
+                  required
+                  autocomplete="off"
+                />
+                <button class="btn-premium py-2 px-5" type="submit">
+                  Analyze
+                </button>
+              </div>
+            </form>
+
+            <div
+              id="loadingSpinner"
+              class="mt-4 text-center"
+              style="display: none"
+            >
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-3 text-muted">AI is analyzing patterns...</p>
+            </div>
+
+            <div
+              id="resultContainer"
+              class="result-display"
+              style="display: none"
+            >
+              <div id="resultBox" class="p-4 rounded-xl">
+                <h3 class="mb-3 d-flex align-items-center gap-2">
+                  <span id="resultIcon"></span>
+                  <span id="resultLabel"></span>
+                </h3>
+                <div class="d-flex flex-wrap gap-4 mt-3">
+                  <div class="flex-grow-1">
+                    <span
+                      class="text-muted d-block small uppercase font-bold mb-1"
+                      >Target URL</span
+                    >
+                    <code id="resultUrl" class="text-main"></code>
+                  </div>
+                  <div>
+                    <span
+                      class="text-muted d-block small uppercase font-bold mb-1"
+                      >Confidence Score</span
+                    >
+                    <span
+                      id="resultConfidence"
+                      class="h4 mb-0 font-black"
+                    ></span
+                    >%
+                  </div>
+                </div>
+              </div>
+
+              <!-- Domain Intelligence Section -->
+              <div
+                id="domainInfoSection"
+                class="mt-3 p-4 rounded-xl glass-deep"
+                style="display: none"
+              >
+                <h4 class="small uppercase font-bold text-muted mb-3">
+                  <i class="fas fa-globe me-2"></i>Domain Intelligence
+                </h4>
+                <div class="row g-3">
+                  <div class="col-6 col-md-3">
+                    <div class="small text-muted">Domain</div>
+                    <div id="domainName" class="font-bold">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="small text-muted">Registrar</div>
+                    <div id="domainRegistrar" class="font-bold">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="small text-muted">Domain Age</div>
+                    <div id="domainAge" class="font-bold">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="small text-muted">Resolved IP</div>
+                    <div id="domainIP" class="font-bold">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="small text-muted">Created</div>
+                    <div id="domainCreated" class="font-bold">—</div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="small text-muted">Expires</div>
+                    <div id="domainExpires" class="font-bold">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="errorMessage"
+              class="alert alert-danger mt-4 bg-transparent border-danger text-danger"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="h1 font-black mb-3">Multi-Layered Intelligence</h2>
+          <p class="text-muted">
+            Our engine looks at over 12 distinct signals to determine risk.
+          </p>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-3">
+            <div class="premium-card">
+              <div class="feature-icon-box"><i class="fas fa-brain"></i></div>
+              <h4>AI Pattern Matching</h4>
+              <p class="text-muted">
+                Random Forest model detects subtle URL obfuscation techniques
+                that bypass traditional filters.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="premium-card">
+              <div class="feature-icon-box"><i class="fas fa-globe"></i></div>
+              <h4>WHOIS Intelligence</h4>
+              <p class="text-muted">
+                Real-time domain age and registrar verification to spot newly
+                registered malicious domains.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="premium-card">
+              <div class="feature-icon-box"><i class="fas fa-route"></i></div>
+              <h4>Redirect Resolution</h4>
+              <p class="text-muted">
+                Follows URL shorteners and complex redirect chains to analyze
+                the final destination.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="premium-card">
+              <div class="feature-icon-box"><i class="fas fa-history"></i></div>
+              <h4>Scan History</h4>
+              <p class="text-muted">
+                Every scan is logged in your personal dashboard so you can
+                review past checks anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-5">
+      <div class="container">
+        <div class="text-center mb-5">
+          <div class="metric-pill mb-3">
+            <i class="fas fa-cogs"></i> Step-by-Step Process
+          </div>
+          <h2 class="h1 font-black mb-3">How It Works</h2>
+          <p class="text-muted mx-auto" style="max-width: 600px">
+            From paste to verdict in seconds. Here's what happens behind the
+            scenes when you scan a URL.
+          </p>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-3">
+            <div
+              class="glass p-4 rounded-3xl text-center h-100"
+              style="border-top: 3px solid var(--primary)"
+            >
+              <div
+                style="
+                  width: 48px;
+                  height: 48px;
+                  background: var(--primary-soft);
+                  border-radius: 50%;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-bottom: 1rem;
+                "
+              >
+                <span
+                  class="font-black"
+                  style="color: var(--primary); font-size: 1.2rem"
+                  >1</span
+                >
+              </div>
+              <h5 class="font-bold mb-2">Paste Your URL</h5>
+              <p class="text-muted small mb-0">
+                Enter any suspicious link into the scanner. We auto-detect the
+                protocol and www prefix.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div
+              class="glass p-4 rounded-3xl text-center h-100"
+              style="border-top: 3px solid var(--secondary)"
+            >
+              <div
+                style="
+                  width: 48px;
+                  height: 48px;
+                  background: rgba(168, 85, 247, 0.12);
+                  border-radius: 50%;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-bottom: 1rem;
+                "
+              >
+                <span
+                  class="font-black"
+                  style="color: var(--secondary); font-size: 1.2rem"
+                  >2</span
+                >
+              </div>
+              <h5 class="font-bold mb-2">Feature Extraction</h5>
+              <p class="text-muted small mb-0">
+                We extract 12+ features: URL length, special chars, digit ratio,
+                HTTPS status, subdomain count, and more.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div
+              class="glass p-4 rounded-3xl text-center h-100"
+              style="border-top: 3px solid var(--accent)"
+            >
+              <div
+                style="
+                  width: 48px;
+                  height: 48px;
+                  background: rgba(56, 189, 248, 0.12);
+                  border-radius: 50%;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-bottom: 1rem;
+                "
+              >
+                <span
+                  class="font-black"
+                  style="color: var(--accent); font-size: 1.2rem"
+                  >3</span
+                >
+              </div>
+              <h5 class="font-bold mb-2">AI Analysis</h5>
+              <p class="text-muted small mb-0">
+                A trained Random Forest model with 100 decision trees votes on
+                whether the URL is phishing or safe.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div
+              class="glass p-4 rounded-3xl text-center h-100"
+              style="border-top: 3px solid var(--success)"
+            >
+              <div
+                style="
+                  width: 48px;
+                  height: 48px;
+                  background: rgba(34, 197, 94, 0.12);
+                  border-radius: 50%;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin-bottom: 1rem;
+                "
+              >
+                <span
+                  class="font-black"
+                  style="color: var(--success); font-size: 1.2rem"
+                  >4</span
+                >
+              </div>
+              <h5 class="font-bold mb-2">Instant Verdict</h5>
+              <p class="text-muted small mb-0">
+                Get a clear Safe/Phishing verdict with confidence score, domain
+                WHOIS info, and safety recommendations.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="py-5">
+      <div class="container">
+        <div class="glass p-5 rounded-3xl">
+          <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+              <div class="h2 font-black mb-1" style="color: var(--primary)">
+                12+
+              </div>
+              <p class="text-muted small mb-0">URL Features Analyzed</p>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="h2 font-black mb-1" style="color: var(--success)">
+                100
+              </div>
+              <p class="text-muted small mb-0">Decision Trees Voting</p>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="h2 font-black mb-1" style="color: var(--accent)">
+                2s
+              </div>
+              <p class="text-muted small mb-0">Average Scan Time</p>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="h2 font-black mb-1" style="color: var(--secondary)">
+                WHOIS
+              </div>
+              <p class="text-muted small mb-0">Domain Intelligence</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <!-- <section id="about" class="py-5">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-6">
+                    <div class="metric-pill mb-3"><i class="fas fa-info-circle"></i> About This Project</div>
+                    <h2 class="h1 font-black mb-3">What is PhishGuard?</h2>
+                    <p class="text-muted mb-3">PhishGuard URL Phishing Detection System is an AI-powered web application designed to protect users from phishing websites. It uses machine learning to analyze URLs in real-time and classify them as safe or malicious.</p>
+                    <p class="text-muted mb-4">Built as a full-stack project combining Flask (Python), scikit-learn for ML, and a modern glassmorphic UI. The system performs WHOIS lookups, DNS resolution, and extracts 12+ features from each URL to make accurate predictions.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge-premium" style="font-size:0.75rem;"><i class="fab fa-python me-1"></i> Python</span>
+                        <span class="badge-premium" style="font-size:0.75rem;"><i class="fas fa-flask me-1"></i> Flask</span>
+                        <span class="badge-premium" style="font-size:0.75rem;"><i class="fas fa-robot me-1"></i> scikit-learn</span>
+                        <span class="badge-premium" style="font-size:0.75rem;"><i class="fas fa-database me-1"></i> SQLite</span>
+                        <span class="badge-premium" style="font-size:0.75rem;"><i class="fab fa-js me-1"></i> JavaScript</span>
+                        <span class="badge-premium" style="font-size:0.75rem;"><i class="fab fa-bootstrap me-1"></i> Bootstrap 5</span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="glass p-4 rounded-3xl">
+                        <h5 class="font-bold mb-3"><i class="fas fa-shield-alt text-primary-light me-2"></i>Key Capabilities</h5>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fas fa-check-circle mt-1" style="color:var(--success);"></i>
+                                <div><strong>Real-time ML Detection</strong><br><span class="text-muted small">Trained Random Forest model classifies URLs with high accuracy and provides confidence scores.</span></div>
+                            </div>
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fas fa-check-circle mt-1" style="color:var(--success);"></i>
+                                <div><strong>Domain WHOIS Analysis</strong><br><span class="text-muted small">Checks domain registration age, registrar, creation and expiry dates for suspicious patterns.</span></div>
+                            </div>
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fas fa-check-circle mt-1" style="color:var(--success);"></i>
+                                <div><strong>User Dashboard & History</strong><br><span class="text-muted small">Personal scan history, detection stats, and exportable data for every registered user.</span></div>
+                            </div>
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fas fa-check-circle mt-1" style="color:var(--success);"></i>
+                                <div><strong>Admin Control Panel</strong><br><span class="text-muted small">User management, system logs, role-based access, and ability to register new users.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+    <!-- Floating Quick-Search Button -->
+    <button
+      id="floatingSearchBtn"
+      type="button"
+      title="Quick scan"
+      style="
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 9999;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+      "
+    >
+      <i class="fas fa-search" style="font-size: 18px"></i>
+    </button>
+
+    <!-- ═══ Footer Modals ═══ -->
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal-overlay">
+      <div
+        class="glass p-4 p-md-5 rounded-3xl"
+        style="
+          max-width: 680px;
+          width: 100%;
+          max-height: 85vh;
+          overflow-y: auto;
+        "
+      >
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="h4 font-bold mb-0">
+            <i class="fas fa-user-shield text-primary-light me-2"></i>Privacy
+            Policy
+          </h3>
+          <button
+            class="btn-ghost p-2"
+            onclick="closeFooterModal('privacyModal')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="text-muted small" style="line-height: 1.8">
+          <p><strong>Last Updated:</strong> February 2026</p>
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            1. Data Collection
+          </h5>
+          <p>
+            PhishGuard collects only the minimum data necessary to operate: your
+            username, email (for account creation), and URLs you submit for
+            analysis. We do not sell or share personal data with third parties.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            2. URL Analysis
+          </h5>
+          <p>
+            URLs submitted for scanning are processed in real-time. Feature
+            extraction is performed server-side. Scan results are stored in your
+            personal history if you are logged in. Anonymous scans are not
+            persisted.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            3. WHOIS Lookups
+          </h5>
+          <p>
+            Domain intelligence queries (WHOIS) are performed via standard
+            public registrar databases. No personal browsing data is shared
+            during this process.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            4. Cookies &amp; Local Storage
+          </h5>
+          <p>
+            We use browser localStorage to persist your session credentials and
+            theme preference. No third-party tracking cookies are used.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            5. Security
+          </h5>
+          <p>
+            Credentials are transmitted using Base64-encoded Basic
+            Authentication over HTTPS. Passwords are hashed server-side using
+            industry-standard algorithms. We recommend using strong, unique
+            passwords.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="modal-overlay">
+      <div
+        class="glass p-4 p-md-5 rounded-3xl"
+        style="
+          max-width: 680px;
+          width: 100%;
+          max-height: 85vh;
+          overflow-y: auto;
+        "
+      >
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="h4 font-bold mb-0">
+            <i class="fas fa-file-contract text-primary-light me-2"></i>Terms of
+            Service
+          </h3>
+          <button
+            class="btn-ghost p-2"
+            onclick="closeFooterModal('termsModal')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="text-muted small" style="line-height: 1.8">
+          <p><strong>Effective:</strong> February 2026</p>
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            1. Acceptance
+          </h5>
+          <p>
+            By using PhishGuard, you agree to these terms. If you do not agree,
+            please discontinue use of the platform immediately.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            2. Service Description
+          </h5>
+          <p>
+            PhishGuard is a URL phishing detection tool built for educational
+            and research purposes. It uses machine learning and WHOIS analysis
+            to assess URL safety. Results are probabilistic and should not be
+            treated as absolute security guarantees.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            3. Acceptable Use
+          </h5>
+          <p>
+            You agree not to: (a) abuse the scanning service with automated bulk
+            requests, (b) use the platform for any illegal purpose, (c) attempt
+            to circumvent authentication or access controls, or (d) share
+            account credentials with others.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            4. Limitation of Liability
+          </h5>
+          <p>
+            PhishGuard is provided "as is" without warranty. The developers are
+            not liable for any damages arising from reliance on scan results,
+            missed detections, or false positives. Always exercise independent
+            judgment when visiting unfamiliar URLs.
+          </p>
+
+          <h5 class="font-bold mt-4 mb-2" style="color: var(--text-main)">
+            5. Account Termination
+          </h5>
+          <p>
+            Administrators reserve the right to suspend or delete any account
+            that violates these terms without prior notice.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Docs Modal -->
+    <div id="apiDocsModal" class="modal-overlay">
+      <div
+        class="glass p-4 p-md-5 rounded-3xl"
+        style="
+          max-width: 720px;
+          width: 100%;
+          max-height: 85vh;
+          overflow-y: auto;
+        "
+      >
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="h4 font-bold mb-0">
+            <i class="fas fa-code text-primary-light me-2"></i>API Documentation
+          </h3>
+          <button
+            class="btn-ghost p-2"
+            onclick="closeFooterModal('apiDocsModal')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="text-muted small" style="line-height: 1.8">
+          <p>
+            All API endpoints require <strong>Basic Authentication</strong> via
+            the
+            <code style="color: var(--primary-light)">Authorization</code>
+            header.
+          </p>
+
+          <div class="glass-deep p-3 rounded-xl mb-4 mt-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge-premium" style="font-size: 0.7rem">POST</span>
+              <code style="color: var(--primary-light)">/api/detect</code>
+            </div>
+            <p class="mb-1">Scan a URL for phishing indicators.</p>
+            <p class="mb-1">
+              <strong>Body:</strong>
+              <code>{ "url": "https://example.com" }</code>
+            </p>
+            <p class="mb-0">
+              <strong>Response:</strong>
+              <code
+                >{ "prediction": 0, "prediction_label": "Legitimate",
+                "confidence": 94.2, "domain_info": {...} }</code
+              >
+            </p>
+          </div>
+
+          <div class="glass-deep p-3 rounded-xl mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge-premium" style="font-size: 0.7rem">GET</span>
+              <code style="color: var(--primary-light)">/api/auth/verify</code>
+            </div>
+            <p class="mb-1">
+              Verify current session credentials &amp; retrieve user info.
+            </p>
+            <p class="mb-0">
+              <strong>Response:</strong>
+              <code
+                >{ "user": { "id": 1, "username": "...", "is_admin": false }
+                }</code
+              >
+            </p>
+          </div>
+
+          <div class="glass-deep p-3 rounded-xl mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge-premium" style="font-size: 0.7rem">GET</span>
+              <code style="color: var(--primary-light)">/api/history</code>
+            </div>
+            <p class="mb-1">Retrieve authenticated user's scan history.</p>
+            <p class="mb-0">
+              <strong>Response:</strong>
+              <code
+                >{ "checks": [{ "url": "...", "prediction_label": "Phishing",
+                "confidence": 97.1, "checked_at": "..." }] }</code
+              >
+            </p>
+          </div>
+
+          <div class="glass-deep p-3 rounded-xl">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge-premium" style="font-size: 0.7rem">POST</span>
+              <code style="color: var(--primary-light)"
+                >/api/auth/register</code
+              >
+            </div>
+            <p class="mb-1">Create a new user account.</p>
+            <p class="mb-0">
+              <strong>Body:</strong>
+              <code
+                >{ "username": "...", "email": "...", "password": "..." }</code
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center">
+      <div class="container">
+
+        <p class="footer-highlight mb-0">Beautifully made with <span class="footer-heart">♥</span> by
+          <a href="https://github.com/Nikit-370/" target="_blank" rel="noopener noreferrer" class="footer-link">
+            <i class="fab fa-github me-1"></i>Nikit Singh Kanyal
+          </a>
+          and
+          <a href="https://github.com/Vaibhav-1922/" target="_blank" rel="noopener noreferrer" class="footer-link">
+            <i class="fab fa-github me-1"></i>Vaibhav Vishwakarma
+          </a>
+        </p>
+
+        <p class="footer-subtext small mt-1">Click a name to visit their GitHub and explore more projects.</p>
+
+        <div class="mt-3 d-flex justify-content-center gap-4">
+          <a href="#" class="nav-link" onclick="openFooterModal('privacyModal'); return false;">Privacy Policy</a>
+          <a href="#" class="nav-link" onclick="openFooterModal('termsModal'); return false;">Terms of Service</a>
+          <a href="#" class="nav-link" onclick="openFooterModal('apiDocsModal'); return false;">API Docs</a>
+        </div>
+        <p class="small mt-2 footer-copy">&copy; PhishGuard 2026. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Footer styles moved to static/css/style.css (.footer-highlight, .footer-subtext, .footer-link) -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script>
+      /* ── Footer Modals ── */
+      function openFooterModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+          modal.style.display = "flex";
+          document.body.style.overflow = "hidden";
+        }
+      }
+      function closeFooterModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+          modal.style.display = "none";
+          document.body.style.overflow = "";
+        }
+      }
+      // Close on backdrop click or Escape
+      document.querySelectorAll(".modal-overlay").forEach((m) => {
+        m.addEventListener("click", (e) => {
+          if (e.target === m) closeFooterModal(m.id);
+        });
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape")
+          document.querySelectorAll(".modal-overlay").forEach((m) => {
+            if (m.style.display === "flex") closeFooterModal(m.id);
+          });
+      });
+
+      const detectionForm = document.getElementById("detectionForm");
+      const urlInput = document.getElementById("urlInput");
+      const httpsToggle = document.getElementById("httpsToggle");
+      const wwwToggle = document.getElementById("wwwToggle");
+      const urlPreview = document.getElementById("urlPreview");
+      const resultContainer = document.getElementById("resultContainer");
+      const loadingSpinner = document.getElementById("loadingSpinner");
+      const errorMessage = document.getElementById("errorMessage");
+
+      // Smart URL parsing: extracts domain+path from any input
+      function extractDomain(raw) {
+        let cleaned = raw.trim();
+        // Strip protocol
+        cleaned = cleaned.replace(/^https?:\/\//i, "");
+        // Strip www.
+        cleaned = cleaned.replace(/^www\./i, "");
+        // Remove trailing slash if just domain
+        if (
+          cleaned.endsWith("/") &&
+          cleaned.indexOf("/") === cleaned.length - 1
+        ) {
+          cleaned = cleaned.slice(0, -1);
+        }
+        return cleaned;
+      }
+
+      // Build full URL from toggles + domain
+      function buildUrl(domain) {
+        const protocol = httpsToggle.checked ? "https://" : "http://";
+        const www = wwwToggle.checked ? "www." : "";
+        return protocol + www + domain;
+      }
+
+      // Live preview update
+      function updatePreview() {
+        const domain = extractDomain(urlInput.value);
+        const protocol = httpsToggle.checked ? "https://" : "http://";
+        const www = wwwToggle.checked ? "www." : "";
+        urlPreview.textContent = protocol + www + (domain || "...");
+      }
+
+      httpsToggle.addEventListener("change", updatePreview);
+      wwwToggle.addEventListener("change", updatePreview);
+      urlInput.addEventListener("input", () => {
+        // Auto-strip protocol/www from pasted URLs
+        const raw = urlInput.value;
+        const hasProtocol = /^https?:\/\//i.test(raw);
+        const hasWww = /^(https?:\/\/)?www\./i.test(raw);
+        if (hasProtocol || hasWww) {
+          if (/^https:\/\//i.test(raw)) httpsToggle.checked = true;
+          if (/^http:\/\//i.test(raw) && !/^https/i.test(raw))
+            httpsToggle.checked = false;
+          if (hasWww) wwwToggle.checked = true;
+          urlInput.value = extractDomain(raw);
+        }
+        updatePreview();
+      });
+
+      detectionForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const domain = extractDomain(urlInput.value);
+        if (!domain) return;
+
+        const fullUrl = buildUrl(domain);
+
+        loadingSpinner.style.display = "block";
+        resultContainer.style.display = "none";
+        errorMessage.style.display = "none";
+
+        try {
+          const creds = localStorage.getItem("system_auth");
+          if (!creds) {
+            setTimeout(() => {
+              loadingSpinner.style.display = "none";
+              errorMessage.textContent =
+                "Please sign in to access the detection engine.";
+              errorMessage.style.display = "block";
+            }, 800);
+            return;
+          }
+
+          const response = await fetch("/api/detect", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Basic ${creds}`,
+            },
+            body: JSON.stringify({ url: fullUrl }),
+          });
+
+          const data = await response.json();
+          loadingSpinner.style.display = "none";
+
+          if (response.ok) {
+            displayResult(data);
+          } else {
+            errorMessage.textContent = data.message || "Analysis failed";
+            errorMessage.style.display = "block";
+          }
+        } catch (error) {
+          loadingSpinner.style.display = "none";
+          errorMessage.textContent = "Connection error. Please try again.";
+          errorMessage.style.display = "block";
+        }
+      });
+
+      function displayResult(data) {
+        const isPhishing = data.prediction === 1;
+        const resultBox = document.getElementById("resultBox");
+
+        resultBox.className = isPhishing
+          ? "p-4 rounded-xl result-danger"
+          : "p-4 rounded-xl result-safe";
+
+        document.getElementById("resultIcon").innerHTML = isPhishing
+          ? '<i class="fas fa-exclamation-triangle text-danger"></i>'
+          : '<i class="fas fa-check-circle text-success"></i>';
+        document.getElementById("resultLabel").textContent =
+          data.prediction_label;
+        document.getElementById("resultLabel").className = isPhishing
+          ? "text-danger h4 mb-0"
+          : "text-success h4 mb-0";
+        document.getElementById("resultUrl").textContent =
+          data.resolved_url || data.url;
+        document.getElementById("resultConfidence").textContent =
+          data.confidence;
+
+        // Populate Domain Intelligence
+        const domainSection = document.getElementById("domainInfoSection");
+        if (domainSection && data.domain_info) {
+          const d = data.domain_info;
+          const hasData = d.domain || d.registrar || d.created_at || d.age_days;
+          if (hasData) {
+            const set = (id, val) => {
+              const el = document.getElementById(id);
+              if (el) el.textContent = val || "—";
+            };
+            set("domainName", d.domain);
+            set("domainRegistrar", d.registrar);
+            set("domainAge", d.age_days != null ? d.age_days + " days" : null);
+            set("domainIP", data.resolved_ip);
+            set(
+              "domainCreated",
+              d.created_at ? new Date(d.created_at).toLocaleDateString() : null,
+            );
+            set(
+              "domainExpires",
+              d.expires_at ? new Date(d.expires_at).toLocaleDateString() : null,
+            );
+            domainSection.style.display = "block";
+          } else {
+            domainSection.style.display = "none";
+          }
+        } else if (domainSection) {
+          domainSection.style.display = "none";
+        }
+
+        resultContainer.style.display = "block";
+      }
+
+      // Floating Search Button JS Code
+      document.addEventListener("DOMContentLoaded", function () {
+        const floatingBtn = document.getElementById("floatingSearchBtn");
+
+        if (floatingBtn) {
+          floatingBtn.addEventListener("click", function () {
+            // Try focusing main scanner input
+            const mainInput = document.getElementById("urlInput");
+
+            if (mainInput) {
+              mainInput.focus();
+
+              // Smooth scroll to hero section
+              mainInput.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+
+              return;
+            }
+
+            // Fallback: try navbar quick input if exists
+            const navInput = document.getElementById("navQuickInput");
+            if (navInput) {
+              navInput.focus();
+              navInput.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

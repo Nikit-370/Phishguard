@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | PhishGuard URL Phishing Detection System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script>
+        (function() {
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <nav class="navbar py-3" id="main-navbar">
+        <div class="nav-container container d-flex align-items-center justify-content-between">
+            <a href="/" class="logo text-decoration-none d-flex align-items-center gap-2">
+                <i class="fas fa-shield-alt text-primary-light"></i>
+                <span class="logo-text">PhishGuard <span class="d-none d-md-inline" style="font-size:0.5em; opacity:0.7;">URL Phishing Detection System</span></span>
+            </a>
+            <div class="d-flex align-items-center gap-4">
+                <ul class="nav-links d-none d-md-flex align-items-center mb-0 list-unstyled">
+                    <li><a href="/" class="nav-link">Scanner</a></li>
+                    <li><a href="/dashboard" class="nav-link active">Dashboard</a></li>
+                    <li id="admin-link" style="display:none;"><a href="/admin" class="nav-link">Admin</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn-ghost p-2" id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <span id="user-greeting" class="text-muted small d-none d-md-inline"></span>
+                    <button id="logout-btn" class="btn-premium py-2 px-3 small" style="font-size: 0.8rem; display:none;">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </button>
+                    <button class="hamburger-btn" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Drawer -->
+        <div class="mobile-nav-drawer">
+            <ul class="mobile-nav-list">
+                <li><a href="/"><i class="fas fa-search"></i> Scanner</a></li>
+                <li><a href="/dashboard" class="active"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+                <li id="mobile-admin-link" style="display:none;"><a href="/admin"><i class="fas fa-user-shield"></i> Admin</a></li>
+            </ul>
+            <div class="mobile-nav-divider"></div>
+            <div class="mobile-nav-divider"></div>
+            <div class="mobile-nav-actions">
+                <span class="mobile-greeting" id="mobile-greeting" style="display:none;"></span>
+                <button class="btn-premium w-100" id="mobile-logout-btn" onclick="handleLogout()" style="display:none;"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5 mt-4">
+        <!-- Hero Section -->
+        <div class="glass p-4 p-md-5 mb-5 rounded-3xl">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="badge-premium mb-3">User Analytics</div>
+                    <h1 class="display-5 font-bold mb-3">Welcome, <span id="user-name" class="text-primary-light">Protected User</span></h1>
+                    <p class="text-muted lead mb-4">Your personal security cockpit. Monitor scans, track threats, and maintain your digital perimeter.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <button class="btn-premium px-4 py-3" onclick="window.location.href='/#detector'">
+                            <i class="fas fa-plus-circle me-2"></i> New URL Scan
+                        </button>
+                        <button class="btn-outline-premium px-4 py-3" onclick="openProfileModal()">
+                            <i class="fas fa-user-cog me-2"></i> Edit Profile
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4 d-none d-lg-block text-center">
+                    <div class="analytics-orb mx-auto">
+                        <i class="fas fa-user-shield fa-4x text-primary-light"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100 border-glow">
+                    <div class="text-muted small uppercase font-bold mb-2">Total Scans</div>
+                    <div id="total-user-scans" class="h2 font-bold mb-0">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100">
+                    <div class="text-muted small uppercase font-bold mb-2">Safe URLs</div>
+                    <div id="safe-count" class="h2 font-bold mb-0 text-success">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100">
+                    <div class="text-muted small uppercase font-bold mb-2">Phishing Blocked</div>
+                    <div id="phishing-count" class="h2 font-bold mb-0 text-danger">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100">
+                    <div class="text-muted small uppercase font-bold mb-2">Avg Confidence</div>
+                    <div id="accuracy" class="h2 font-bold mb-0 text-warning">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Scan History -->
+            <div class="col-lg-8">
+                <div class="glass p-4 rounded-3xl h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="h4 font-bold mb-0">Recent Activity</h3>
+                        <div class="badge-premium" id="history-page-label">Page 1</div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-dark-custom align-middle">
+                            <thead>
+                            <tr>
+                                <th class="small text-muted border-0" style="width: 180px;">Timestamp</th>
+                                <th class="small text-muted border-0">URL</th>
+                                <th class="small text-muted border-0" style="width: 110px;">Prediction</th>
+                                <th class="small text-muted border-0" style="width: 140px;">Type</th>
+                                <th class="small text-muted border-0" style="width: 110px;">Confidence</th>
+                                <th class="small text-muted border-0 text-end" style="width: 80px;">Actions</th>
+                            </tr>
+                        </thead>
+                            <tbody id="history-table-body">
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="fas fa-box-open fa-2x mb-3 d-block opacity-25"></i>
+                                        No historical records found in your secure vault.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="d-flex gap-2">
+                            <button id="history-prev" class="btn-icon-premium" onclick="prevHistoryPage()" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button id="history-next" class="btn-icon-premium" onclick="nextHistoryPage()" disabled>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <button class="nav-link small opacity-75" onclick="exportData()">
+                            <i class="fas fa-download me-1"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Info & Tips -->
+            <div class="col-lg-4">
+                <div class="d-flex flex-column gap-4 h-100">
+                    <div class="glass p-4 rounded-3xl">
+                        <h3 class="h4 font-bold mb-4">Security Insights</h3>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="insight-card p-3 glass-deep rounded-2xl border-glow">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="icon-circle bg-success-soft">
+                                        <i class="fas fa-shield-alt text-success"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small font-bold">Safe Pattern</div>
+                                        <div class="text-muted x-small">Verified domains dominate your history.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="insight-card p-3 glass-deep rounded-2xl">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="icon-circle bg-primary-soft">
+                                        <i class="fas fa-fingerprint text-primary-light"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small font-bold">Threat Monitor</div>
+                                        <div class="text-muted x-small">No severe threats encountered today.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass p-4 rounded-3xl flex-grow-1">
+                        <h3 class="h4 font-bold mb-4">Cyber Hygiene</h3>
+                        <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+                            <li class="d-flex gap-3 align-items-start">
+                                <i class="fas fa-check-circle text-primary-light mt-1"></i>
+                                <span class="small text-muted">Always check the URL path for suspicious characters before clicking sensitive links.</span>
+                            </li>
+                            <li class="d-flex gap-3 align-items-start">
+                                <i class="fas fa-check-circle text-primary-light mt-1"></i>
+                                <span class="small text-muted">The system can detect "Look-alike" domains that mimic popular services perfectly.</span>
+                            </li>
+                            <li class="d-flex gap-3 align-items-start">
+                                <i class="fas fa-check-circle text-primary-light mt-1"></i>
+                                <span class="small text-muted">Export your scan data weekly to keep your own logs of suspicious interactions.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Deletion Confirmation -->
+    <div id="confirmModal" class="modal-overlay d-none">
+        <div class="glass p-5 rounded-3xl max-w-lg mx-auto text-center shadow-2xl">
+            <div class="icon-circle bg-danger-soft mx-auto mb-4" style="width: 80px; height: 80px;">
+                <i class="fas fa-trash-alt text-danger fa-2x"></i>
+            </div>
+            <h3 class="h4 font-bold mb-3" id="confirmTitle">Confirm Action</h3>
+            <p class="text-muted mb-4" id="confirmMessage">Are you sure you want to perform this operation? This cannot be undone.</p>
+            <div class="d-flex gap-3 justify-content-center">
+                <button class="btn-outline-premium px-4 py-2" onclick="closeConfirmModal()">Cancel</button>
+                <button id="confirmBtn" class="btn-premium bg-danger border-danger px-4 py-2">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const creds = localStorage.getItem('system_auth');
+            if (!creds) {
+                window.location.href = '/login';
+                return;
+            }
+            // logout-btn event listener
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                   if (typeof handleLogout === 'function') {
+                       handleLogout();
+                   } else {
+                       localStorage.removeItem('system_auth');
+                       localStorage.removeItem('system_user');
+                       window.location.href = '/login';
+                   }
+                });
+            }
+        });
+
+        function refreshStats() {
+            const creds = localStorage.getItem('system_auth');
+            if (typeof loadStats === 'function') loadStats(creds);
+            if (typeof loadHistory === 'function') loadHistory(creds);
+        }
+
+        function exportData() {
+            const creds = localStorage.getItem('system_auth');
+            if (!creds) return;
+            fetch('/api/history', { 
+                headers: { 'Authorization': 'Basic ' + creds } 
+            })
+            .then(res => res.json())
+            .then(data => {
+                const history = data.checks || [];
+                if (!history.length) return alert('No data available to export.');
+                
+                let csv = 'Timestamp,URL,Prediction,Confidence\n';
+                history.forEach(item => {
+                    csv += `"${item.checked_at}","${item.url}","${item.prediction_label}","${item.confidence}"\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', `phishing_scans_${new Date().toISOString().split('T')[0]}.csv`);
+                a.click();
+            });
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('d-none');
+        }
+
+        function showConfirm(title, message, callback) {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = message;
+            const btn = document.getElementById('confirmBtn');
+            btn.onclick = () => {
+                callback();
+                closeConfirmModal();
+            };
+            modal.classList.remove('d-none');
+        }
+    </script>
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal-overlay d-none">
+        <div class="glass p-5 rounded-3xl max-w-lg mx-auto shadow-2xl">
+            <h3 class="h4 font-bold mb-1">Update Security Profile</h3>
+            <p class="text-muted small mb-4">Manage your personal account credentials and identification.</p>
+            <form id="profileForm" class="d-flex flex-column gap-3">
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Account Username</label>
+                    <input type="text" id="profileUsername" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" required>
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Email Address</label>
+                    <input type="email" id="profileEmail" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" required>
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Access Password</label>
+                    <input type="password" id="profilePassword" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" placeholder="Leave blank to retain current">
+                </div>
+                <div class="d-flex gap-3 mt-3">
+                    <button type="button" class="btn-outline-premium w-100" onclick="closeProfileModal()">Cancel</button>
+                    <button type="button" class="btn-premium w-100" onclick="updateProfile()">Confirm Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+        <footer class="text-center mt-5">
+            <div class="container">
+                <p class="footer-highlight mb-0">Beautifully made with <span class="footer-heart">♥</span> by
+                    <a href="https://github.com/Nikit-370/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Nikit Singh Kanyal</a>
+                    and
+                    <a href="https://github.com/Vaibhav-1922/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Vaibhav Vishwakarma</a>
+                </p>
+                <p class="footer-subtext small mt-1">Click a name to visit their GitHub and explore more projects.</p>
+                <!-- <p class="small mt-2">MCA final year project</p> -->
+                <div class="mt-3 d-flex justify-content-center gap-4">
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('privacyModal'); return false;} window.location.href='/';">Privacy Policy</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('termsModal'); return false;} window.location.href='/';">Terms of Service</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('apiDocsModal'); return false;} window.location.href='/';">API Docs</a>
+                </div>
+                <p class="small mt-2 footer-copy">&copy; PhishGuard 2026. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <!-- Footer styles are centralized in static/css/style.css (.footer-highlight, .footer-subtext, .footer-link) -->
+</body>
+</html>

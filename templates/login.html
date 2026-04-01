@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | PhishGuard URL Phishing Detection System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <script>
+        (function() {
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body class="login-page d-flex align-items-center justify-content-center min-vh-100">
+    
+    <!-- Animated background blobs -->
+    <div class="login-bg-effects">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="login-split-container">
+        <!-- Left: Branding & Features Panel -->
+        <div class="login-brand-panel d-none d-lg-flex">
+            <div class="brand-content">
+                <div class="mb-4">
+                    <i class="fas fa-shield-alt" style="font-size:2.5rem; color:var(--primary-light);"></i>
+                </div>
+                <h2 class="font-black mb-2" style="font-size:1.8rem;">PhishGuard</h2>
+                <p class="text-muted mb-4" style="font-size:0.9rem;">URL Phishing Detection System</p>
+                
+                <div class="login-features">
+                    <div class="login-feature-item">
+                        <div class="login-feature-icon"><i class="fas fa-brain"></i></div>
+                        <div>
+                            <strong>AI-Powered Detection</strong>
+                            <span class="text-muted small d-block">ML model with 100 decision trees</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="login-feature-icon"><i class="fas fa-globe"></i></div>
+                        <div>
+                            <strong>WHOIS Intelligence</strong>
+                            <span class="text-muted small d-block">Domain age & registrar verification</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="login-feature-icon"><i class="fas fa-chart-line"></i></div>
+                        <div>
+                            <strong>Personal Dashboard</strong>
+                            <span class="text-muted small d-block">Track all your scans & results</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="login-feature-icon"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <strong>Instant Results</strong>
+                            <span class="text-muted small d-block">Scan any URL in under 2 seconds</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-auto pt-4">
+                    <p class="text-faint small mb-0">&copy; 2026 PhishGuard. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Auth Forms Panel -->
+        <div class="login-form-panel">
+            <div class="auth-container">
+                <div class="glass p-5 rounded-3xl">
+                    <div class="text-center mb-5">
+                        <a href="/" class="logo-text text-decoration-none d-block mb-1 d-lg-none" style="font-size:1.5rem;">PhishGuard</a>
+                        <h3 class="font-bold mb-2 d-none d-lg-block">Welcome Back</h3>
+                        <p class="text-muted small">Sign in to access the protection engine</p>
+                    </div>
+                    {% if demo_mode %}
+                    <div class="alert alert-info small mb-3">
+                        Demo mode: no login required on this deployment. Use the demo credentials or click
+                        <button id="useDemoBtn" class="btn btn-sm btn-outline-primary ms-2">Use Demo</button>
+                    </div>
+                    {% endif %}
+            
+            <div id="errorAlert" class="alert alert-danger mb-4 d-none" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> <span id="errorMessage"></span>
+            </div>
+            
+            <div id="successAlert" class="alert alert-success mb-4 d-none" role="alert">
+                <i class="fas fa-check-circle me-2"></i> <span id="successMessage"></span>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group mb-4">
+                    <label class="small uppercase font-bold text-muted mb-2 d-block">Username</label>
+                    <div class="detector-input-group px-3">
+                        <i class="fas fa-user text-muted"></i>
+                        <input type="text" id="username" class="py-2" placeholder="e.g. jdoe_safe" required>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label class="small uppercase font-bold text-muted mb-2 d-block">Password</label>
+                    <div class="detector-input-group px-3">
+                        <i class="fas fa-lock text-muted"></i>
+                        <input type="password" id="password" class="py-2" placeholder="••••••••" required>
+                        <button type="button" class="btn-ghost p-2 pw-toggle" onclick="togglePw('password', this)" title="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-premium w-100 py-3 mt-2">
+                    <i class="fas fa-sign-in-alt me-2"></i> Access Dashboard
+                </button>
+            </form>
+            {% if demo_mode %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function(){
+                    const btn = document.getElementById('useDemoBtn');
+                    if (btn) {
+                        btn.addEventListener('click', function(){
+                            document.getElementById('username').value = '{{ demo_username }}';
+                            document.getElementById('password').value = '{{ demo_password }}';
+                            // auto-submit
+                            loginForm.dispatchEvent(new Event('submit'));
+                        });
+                    }
+                });
+            </script>
+            {% endif %}
+            
+            <!-- Signup Flow -->
+            <div id="toggleSignup" class="text-center mt-4">
+                <p class="text-muted small mb-0">Don't have an account? <a href="#" onclick="toggleForms(event)" class="text-primary-light text-decoration-none font-bold">Create one free</a></p>
+            </div>
+            
+            <!-- Signup Form (Hidden) -->
+            <form id="signupForm" class="d-none">
+                <div class="form-group mb-4">
+                    <label class="small uppercase font-bold text-muted mb-2 d-block">Username</label>
+                    <div class="detector-input-group px-3">
+                        <i class="fas fa-user text-muted"></i>
+                        <input type="text" id="signupUsername" class="py-2" placeholder="Desired username" required>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label class="small uppercase font-bold text-muted mb-2 d-block">Email Address</label>
+                    <div class="detector-input-group px-3">
+                        <i class="fas fa-envelope text-muted"></i>
+                        <input type="email" id="signupEmail" class="py-2" placeholder="you@example.com" required>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label class="small uppercase font-bold text-muted mb-2 d-block">Password</label>
+                    <div class="detector-input-group px-3">
+                        <i class="fas fa-lock text-muted"></i>
+                        <input type="password" id="signupPassword" class="py-2" placeholder="Min. 6 characters" required>
+                        <button type="button" class="btn-ghost p-2 pw-toggle" onclick="togglePw('signupPassword', this)" title="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label class="small uppercase font-bold text-muted mb-2 d-block">Confirm Password</label>
+                    <div class="detector-input-group px-3">
+                        <i class="fas fa-shield-alt text-muted"></i>
+                        <input type="password" id="confirmPassword" class="py-2" placeholder="Re-enter password" required>
+                        <button type="button" class="btn-ghost p-2 pw-toggle" onclick="togglePw('confirmPassword', this)" title="Show password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-premium w-100 py-3 mt-2">
+                    <i class="fas fa-user-plus me-2"></i> Join System
+                </button>
+            </form>
+            
+            <div id="toggleLogin" class="text-center mt-4 d-none">
+                <p class="text-muted small mb-0">Already protected? <a href="#" onclick="toggleForms(event)" class="text-primary-light text-decoration-none font-bold">Sign in here</a></p>
+            </div>
+            </div> <!-- close glass -->
+            
+            <div class="text-center mt-4">
+                <a href="/" class="nav-link small"><i class="fas fa-arrow-left me-2"></i> Back to home</a>
+            </div>
+        </div> <!-- close auth-container -->
+        </div> <!-- close login-form-panel -->
+    </div> <!-- close login-split-container -->
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle password visibility
+        function togglePw(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+                btn.title = 'Hide password';
+            } else {
+                inp.type = 'password';
+                icon.className = 'fas fa-eye';
+                btn.title = 'Show password';
+            }
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const toggleSignup = document.getElementById('toggleSignup');
+        const toggleLogin = document.getElementById('toggleLogin');
+        const errorAlert = document.getElementById('errorAlert');
+        const successAlert = document.getElementById('successAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        
+        function showAlert(type, message) {
+            if (type === 'error') {
+                errorMessage.textContent = message;
+                errorAlert.classList.remove('d-none');
+                successAlert.classList.add('d-none');
+            } else {
+                successMessage.textContent = message;
+                successAlert.classList.remove('d-none');
+                errorAlert.classList.add('d-none');
+            }
+        }
+        
+        function toggleForms(e) {
+            e.preventDefault();
+            loginForm.classList.toggle('d-none');
+            signupForm.classList.toggle('d-none');
+            toggleSignup.classList.toggle('d-none');
+            toggleLogin.classList.toggle('d-none');
+            errorAlert.classList.add('d-none');
+            successAlert.classList.add('d-none');
+        }
+
+
+
+        async function persistSession(username, password) {
+            const creds = btoa(`${username}:${password}`);
+            localStorage.setItem('system_auth', creds);
+            try {
+                const me = await fetch('/api/auth/verify', { 
+                    headers: { 'Authorization': 'Basic ' + creds } 
+                });
+                if (!me.ok) return null;
+                const payload = await me.json();
+                const user = payload.user || payload;
+                const userObj = {
+                    id: user.id,
+                    name: user.username || user.name || user.email,
+                    email: user.email || user.username,
+                    is_admin: !!user.is_admin,
+                    role: user.is_admin ? 'admin' : 'user'
+                };
+                localStorage.setItem('system_user', JSON.stringify(userObj));
+                return userObj;
+            } catch (err) {
+                console.error('Session persistence failed', err);
+                return null;
+            }
+        }
+        
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                // Verify credentials by calling verify endpoint with Basic Auth
+                // Since we removed /api/auth/login, we use verification as the "login" check
+                const creds = btoa(`${username}:${password}`);
+                const response = await fetch('/api/auth/verify', {
+                    headers: { 'Authorization': 'Basic ' + creds }
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    const user = await persistSession(username, password);
+                    showAlert('success', 'Access granted. Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = (user && user.is_admin) ? '/admin' : '/dashboard';
+                    }, 1000);
+                } else {
+                    showAlert('error', data.message || 'Invalid credentials');
+                }
+            } catch (error) {
+                showAlert('error', 'Authentication service unavailable');
+            }
+        });
+        
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showAlert('error', 'Passwords do not match');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, email, password})
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    const user = await persistSession(username, password);
+                    showAlert('success', 'Account created! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = (user && user.is_admin) ? '/admin' : '/dashboard';
+                    }, 1200);
+                } else {
+                    showAlert('error', data.message || 'Registration failed');
+                }
+            } catch (error) {
+                showAlert('error', 'Sign up currently unavailable');
+            }
+        });
+    </script>
+        <!-- Footer -->
+        <footer class="text-center mt-4">
+            <div class="container">
+                <p class="footer-highlight mb-0">Beautifully made with <span class="footer-heart">♥</span> by
+                    <a href="https://github.com/Nikit-370/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Nikit Singh Kanyal</a>
+                    and
+                    <a href="https://github.com/Vaibhav-1922/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Vaibhav Vishwakarma</a>
+                </p>
+                <p class="footer-subtext small mt-1">Click a name to visit their GitHub and explore more projects.</p>
+                <!-- <p class="small mt-2">MCA final year project</p> -->
+                <div class="mt-3 d-flex justify-content-center gap-4">
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('privacyModal'); return false;} window.location.href='/';">Privacy Policy</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('termsModal'); return false;} window.location.href='/';">Terms of Service</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('apiDocsModal'); return false;} window.location.href='/';">API Docs</a>
+                </div>
+                <p class="small mt-2 footer-copy">&copy; PhishGuard 2026. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <!-- Footer styles are centralized in static/css/style.css (.footer-highlight, .footer-subtext, .footer-link) -->
+</body>
+</html>
+

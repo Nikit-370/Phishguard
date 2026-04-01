@@ -1,0 +1,136 @@
+/* ═══════════════════════════════════════════════════════════
+   PhishGuard — Dashboard
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Stat Cards ── */
+.stat-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+    background: var(--card-bg-deep);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* ── Analytics Orb ── */
+.analytics-orb {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 40px var(--glow-primary);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.analytics-orb::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, var(--glow-primary), transparent, rgba(168, 85, 247, 0.08), transparent);
+    animation: orbRotate 8s linear infinite;
+}
+
+@keyframes orbRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.analytics-orb:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 60px var(--glow-primary);
+}
+
+.analytics-orb > i {
+    position: relative;
+    z-index: 1;
+}
+
+.orb-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    position: relative;
+    z-index: 1;
+}
+
+.orb-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ── Status Pulse ── */
+.status-indicator-pulse {
+    width: 9px;
+    height: 9px;
+    background-color: var(--success);
+    border-radius: 50%;
+    position: relative;
+    display: inline-block;
+}
+
+.status-indicator-pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background-color: var(--success);
+    animation: ripple 2s infinite;
+}
+
+
+/* ── Insight Cards ── */
+.insight-card {
+    transition: all 0.3s ease;
+}
+
+.insight-card:hover {
+    transform: translateX(4px);
+    border-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .analytics-orb { width: 140px; height: 140px; }
+    .stat-value { font-size: 1.5rem; }
+}

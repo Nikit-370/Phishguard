@@ -1,0 +1,191 @@
+/* ═══════════════════════════════════════════════════════════
+   PhishGuard — Landing Page
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Hero ── */
+.hero {
+    padding: 7rem 0 5rem;
+    position: relative;
+    z-index: 10;
+}
+
+.hero h1 {
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    line-height: 1.08;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.04em;
+    font-weight: 900;
+}
+
+.hero .lead {
+    max-width: 640px;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+    line-height: 1.75;
+}
+
+/* ── Detector Input (index overrides) ── */
+.detector-container {
+    max-width: 780px;
+    margin: 3rem auto;
+}
+
+
+/* ── Feature Cards ── */
+.premium-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--border-color);
+    height: 100%;
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.premium-card:hover {
+    background: var(--card-bg-deep);
+    transform: translateY(-10px);
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(99, 102, 241, 0.1);
+}
+
+.premium-card h4 {
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
+.premium-card p {
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.feature-icon-box {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 20px var(--glow-primary);
+    color: white;
+}
+
+/* ── Inline Results ── */
+.result-display {
+    animation: slideDown 0.45s ease;
+    margin-top: 1.5rem;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-safe {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+}
+
+.result-danger {
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+}
+
+/* ── Toggle Switches ── */
+.toggle-row {
+    flex-wrap: wrap;
+}
+
+.toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 38px;
+    height: 20px;
+    background: var(--card-bg-deep);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(18px);
+    background: #fff;
+}
+
+.toggle-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    transition: color 0.3s ease;
+}
+
+.toggle-switch input:checked ~ .toggle-label {
+    color: var(--primary);
+}
+
+.url-preview {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    background: var(--card-bg-deep);
+    padding: 0.3rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 320px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .hero { padding: 5rem 0 3rem; }
+    .premium-card { padding: 1.75rem; }
+    .feature-icon-box { width: 44px; height: 44px; font-size: 1.1rem; }
+    .toggle-row { gap: 0.75rem !important; }
+    .url-preview { display: none; }
+}

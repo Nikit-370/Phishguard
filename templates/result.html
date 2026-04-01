@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result | PhishGuard URL Phishing Detection System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+    <script>
+        // Apply saved theme IMMEDIATELY to prevent flash
+        (function() {
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar py-3" id="main-navbar">
+        <div class="nav-container container d-flex align-items-center justify-content-between">
+            <a href="/" class="logo text-decoration-none d-flex align-items-center gap-2">
+                <i class="fas fa-shield-alt text-primary-light"></i>
+                <span class="logo-text">PhishGuard <span class="d-none d-md-inline" style="font-size:0.5em; opacity:0.7;">URL Phishing Detection System</span></span>
+            </a>
+            <div class="d-flex align-items-center gap-4">
+                <ul class="nav-links d-none d-md-flex align-items-center mb-0 list-unstyled">
+                    <li><a href="/" class="nav-link">Scanner</a></li>
+                    <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+                    <li id="admin-link" style="display:none;"><a href="/admin" class="nav-link">Admin</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn-ghost p-2" id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <span id="user-greeting" class="text-muted small d-none d-md-inline"></span>
+                    <button class="btn-ghost" id="login-btn" onclick="window.location.href='/login'" style="display:none;">Sign In</button>
+                    <button id="logout-btn" class="btn-premium py-2 px-3 small" onclick="handleLogout()" style="display:none; font-size: 0.8rem;">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </button>
+                    <button class="hamburger-btn" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Drawer -->
+        <div class="mobile-nav-drawer">
+            <ul class="mobile-nav-list">
+                <li><a href="/"><i class="fas fa-search"></i> Scanner</a></li>
+                <li><a href="/dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+                <li id="mobile-admin-link" style="display:none;"><a href="/admin"><i class="fas fa-user-shield"></i> Admin</a></li>
+            </ul>
+            <div class="mobile-nav-divider"></div>
+            <div class="mobile-nav-actions">
+                <span class="mobile-greeting" id="mobile-greeting" style="display:none;"></span>
+                <button class="btn-ghost w-100 text-start" id="mobile-login-btn" onclick="window.location.href='/login'"><i class="fas fa-sign-in-alt me-2"></i>Sign In</button>
+                <button class="btn-premium w-100" id="mobile-logout-btn" onclick="handleLogout()" style="display:none;"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <!-- Error Case -->
+        {% if error %}
+        <div class="result-card">
+            <div class="error-alert">
+                <h2><i class="fas fa-exclamation-triangle"></i> Error</h2>
+                <p>{{ error }}</p>
+            </div>
+            <div class="btn-group">
+                <a href="/" class="btn-action btn-primary-action">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+                <a href="/" class="btn-action btn-secondary-action">
+                    <i class="fas fa-check"></i> Check Another URL
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <!-- Success Case -->
+        <div class="result-card result-{{ 'phishing' if 'Phishing' in result else 'legitimate' }}">
+            <div class="result-header">
+                <div class="result-icon">
+                    {% if 'Phishing' in result %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% else %}
+                        <i class="fas fa-shield-alt"></i>
+                    {% endif %}
+                </div>
+                <div class="result-status">{{ result }}</div>
+            </div>
+            
+            <!-- URL Display (theme-aware) -->
+            <div class="url-display">
+                <small>ANALYZED URL</small>
+                <div>{{ url }}</div>
+            </div>
+            
+            <!-- Confidence Score (theme-aware) -->
+            <div class="confidence-score">
+                <div>
+                    <small class="text-muted uppercase font-bold x-small">Confidence</small>
+                    <div class="confidence-value" id="confidence-display">—</div>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="confidence-bar"></div>
+                </div>
+            </div>
+            
+            <!-- Features Section -->
+            {% if features %}
+            <div class="features-section">
+                <h3><i class="fas fa-microscope"></i> Feature Analysis</h3>
+                <div class="features-grid">
+                    {% for key, value in features.items() %}
+                    <div class="feature-item">
+                        <div class="feature-label">{{ key.replace('_', ' ').title() }}</div>
+                        <div class="feature-value">
+                            {% if key == 'url_length' or key == 'path_length' %}
+                                {{ value }} chars
+                            {% elif key == 'https' %}
+                                {{ 'HTTPS ✓' if value == 1 else 'HTTP ✗' }}
+                            {% elif value in [0, 1] %}
+                                {{ '✓ Yes' if value == 1 else '✗ No' }}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Safety Tips -->
+            {% if 'Phishing' in result %}
+            <div class="safety-tips">
+                <h4><i class="fas fa-lightbulb"></i> Safety Recommendations</h4>
+                <ul>
+                    <li>Do NOT click on this URL or any links within it</li>
+                    <li>Do NOT enter any personal or financial information</li>
+                    <li>Report this URL to the appropriate authorities if received in an email</li>
+                    <li>If you received this in an email, mark it as spam/phishing</li>
+                    <li>Contact the website's support team if your account was compromised</li>
+                </ul>
+            </div>
+            {% else %}
+            <div class="safety-tips">
+                <h4><i class="fas fa-check-circle"></i> This URL Appears to be Legitimate</h4>
+                <ul>
+                    <li>This URL passed our phishing detection analysis</li>
+                    <li>However, always exercise caution when entering sensitive information</li>
+                    <li>Verify the domain name carefully before entering credentials</li>
+                    <li>This analysis is not a guarantee of safety - use your judgment</li>
+                </ul>
+            </div>
+            {% endif %}
+            
+            <!-- Action Buttons -->
+            <div class="btn-group">
+                <a href="/" class="btn-action btn-primary-action">
+                    <i class="fas fa-check"></i> Check Another URL
+                </a>
+                <a href="/dashboard" class="btn-action btn-secondary-action">
+                    <i class="fas fa-chart-bar"></i> View Dashboard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animate confidence score
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const confidence = urlParams.get('confidence');
+            
+            if (confidence) {
+                animateConfidence(parseFloat(confidence));
+            } else {
+                setTimeout(() => {
+                    const text = document.querySelector('.confidence-value');
+                    if (text && text.textContent !== '—') {
+                        const value = parseFloat(text.textContent.replace('%', ''));
+                        animateConfidence(value);
+                    }
+                }, 100);
+            }
+        });
+        
+        function animateConfidence(finalValue) {
+            const display = document.getElementById('confidence-display');
+            const progressBar = document.getElementById('confidence-bar');
+            let currentValue = 0;
+            const interval = setInterval(() => {
+                currentValue += finalValue / 20;
+                if (currentValue >= finalValue) {
+                    currentValue = finalValue;
+                    clearInterval(interval);
+                }
+                display.textContent = currentValue.toFixed(1) + '%';
+                progressBar.style.width = currentValue + '%';
+            }, 30);
+        }
+    </script>
+    <script>
+        function toggleMobileNav() {
+            const navbar = document.getElementById('main-navbar');
+            if (navbar) navbar.classList.toggle('mobile-nav-open');
+        }
+    </script>
+        <footer class="text-center mt-4">
+            <div class="container">
+                <p class="footer-highlight mb-0">Beautifully made with <span class="footer-heart">♥</span> by
+                    <a href="https://github.com/Nikit-370/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Nikit Singh Kanyal</a>
+                    and
+                    <a href="https://github.com/Vaibhav-1922/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Vaibhav Vishwakarma</a>
+                </p>
+                <p class="footer-subtext small mt-1">Click a name to visit their GitHub and explore more projects.</p>
+                <!-- <p class="small mt-2">MCA final year project</p> -->
+                <div class="mt-3 d-flex justify-content-center gap-4">
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('privacyModal'); return false;} window.location.href='/';">Privacy Policy</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('termsModal'); return false;} window.location.href='/';">Terms of Service</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('apiDocsModal'); return false;} window.location.href='/';">API Docs</a>
+                </div>
+                <p class="small mt-2 footer-copy">&copy; PhishGuard 2026. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <!-- Footer styles are centralized in static/css/style.css (.footer-highlight, .footer-subtext, .footer-link) -->
+</body>
+</html>

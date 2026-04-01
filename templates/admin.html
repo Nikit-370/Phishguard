@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | PhishGuard URL Phishing Detection System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script>
+        (function() {
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+</head>
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <nav class="navbar py-3" id="main-navbar">
+        <div class="nav-container container d-flex align-items-center justify-content-between">
+            <a href="/" class="logo text-decoration-none d-flex align-items-center gap-2">
+                <i class="fas fa-shield-alt text-primary-light"></i>
+                <span class="logo-text">PhishGuard <span class="d-none d-md-inline" style="font-size:0.5em; opacity:0.7;">URL Phishing Detection System</span></span>
+            </a>
+            <div class="d-flex align-items-center gap-4">
+                <ul class="nav-links d-none d-md-flex align-items-center mb-0 list-unstyled">
+                    <li><a href="/" class="nav-link">Scanner</a></li>
+                    <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+                    <li><a href="/admin" class="nav-link active">Admin</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn-ghost p-2" id="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <span id="user-greeting" class="text-primary-light font-bold small d-none d-md-inline"></span>
+                    <button id="logout-btn" class="btn-premium py-2 px-3 small" style="font-size: 0.8rem; display:none;">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </button>
+                    <button class="hamburger-btn" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Drawer -->
+        <div class="mobile-nav-drawer">
+            <ul class="mobile-nav-list">
+                <li><a href="/"><i class="fas fa-search"></i> Scanner</a></li>
+                <li><a href="/dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+                <li><a href="/admin" class="active"><i class="fas fa-user-shield"></i> Admin</a></li>
+            </ul>
+            <div class="mobile-nav-divider"></div>
+            <div class="mobile-nav-actions">
+                <span class="mobile-greeting" id="mobile-greeting" style="display:none;"></span>
+                <button class="btn-premium w-100" id="mobile-logout-btn" onclick="handleLogout()" style="display:none;"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5 mt-4">
+        <!-- Admin Hero -->
+        <div class="glass p-4 p-md-5 mb-5 rounded-3xl">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="badge-premium mb-3">System Administration</div>
+                    <h1 class="display-5 font-bold mb-3">System Control Center</h1>
+                    <p class="text-muted lead mb-4">Master system settings, manage users, and monitor global threat intelligence. High-level security enforcement.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <button class="btn-premium px-4 py-3" onclick="addNewUser()">
+                            <i class="fas fa-user-plus me-2"></i> Register New User
+                        </button>
+                        <button class="btn-outline-premium px-4 py-3" onclick="toggleAdminView()" id="toggle-view-btn">
+                            <i class="fas fa-chart-line me-2"></i> Show Activity
+                        </button>
+                        <div class="system-status glass-deep py-2 px-4 rounded-full d-flex align-items-center gap-2" id="system-status">
+                            <div class="status-indicator-pulse"></div>
+                            <span class="small font-bold uppercase tracking-wider">System Online</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 d-none d-lg-block text-center">
+                    <div class="analytics-orb mx-auto bg-primary-soft">
+                        <i class="fas fa-user-cog fa-4x text-primary-light"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+        <!-- Admin KPI Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100">
+                    <div class="text-muted small uppercase font-bold mb-2">Network Users</div>
+                    <div id="total-users" class="h2 font-bold mb-0">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100">
+                    <div class="text-muted small uppercase font-bold mb-2">Global Scans</div>
+                    <div id="total-scans-admin" class="h2 font-bold mb-0 text-primary-light">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100">
+                    <div class="text-muted small uppercase font-bold mb-2">Malicious Hits</div>
+                    <div id="phishing-detected-admin" class="h2 font-bold mb-0 text-danger">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass p-4 text-center rounded-2xl h-100">
+                    <div class="text-muted small uppercase font-bold mb-2">SLA Uptime</div>
+                    <div class="h2 font-bold mb-0 text-success">99.9%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="glass p-4 rounded-3xl mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="detector-input-group px-3">
+                        <i class="fas fa-search text-muted"></i>
+                        <input type="text" id="user-search" class="py-2" placeholder="Search by name, email or ID...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="role-filter" class="form-select glass-deep border-0 rounded-xl py-2" onchange="searchUsers()">
+                        <option value="all">All Roles</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn-premium px-4 w-100" onclick="searchUsers()">Search</button>
+                    <button class="btn-outline-premium px-4 w-100" onclick="refreshUsers()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="glass p-4 rounded-3xl h-100">
+                    <div id="main-users-view">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="h4 font-bold mb-0" id="main-view-title">User Management</h3>
+                            <div class="d-flex gap-2 align-items-center">
+                                <div class="small text-muted" id="users-info">Loading...</div>
+                                <button class="btn-premium px-3 py-1" onclick="addNewUser()" style="font-size:0.85rem;"><i class="fas fa-user-plus me-1"></i> Add User</button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-dark-custom align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="small text-muted border-0" style="width: 60px;">ID</th>
+                                        <th class="small text-muted border-0">Username</th>
+                                        <th class="small text-muted border-0">Email</th>
+                                        <th class="small text-muted border-0" style="width: 100px;">Role</th>
+                                        <th class="small text-muted border-0" style="width: 140px;">Created</th>
+                                        <th class="small text-muted border-0 text-end" style="width: 120px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">Loading Secure Directory...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="pagination-bar mt-4 pt-3 border-top border-white-10">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button id="users-first-btn" class="btn-icon-premium" onclick="firstUsersPage()" title="First Page">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </button>
+                                    <button id="users-prev-btn" class="btn-icon-premium" onclick="prevUsersPage()" title="Previous Page">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <div class="badge-premium mx-2" id="users-page-info">Page 1</div>
+                                    <button id="users-next-btn" class="btn-icon-premium" onclick="nextUsersPage()" title="Next Page">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <button id="users-last-btn" class="btn-icon-premium" onclick="lastUsersPage()" title="Last Page">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </button>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Jump to:</span>
+                                    <input type="number" id="users-goto-input" class="form-control form-control-sm glass-deep border-0 rounded-xl" 
+                                           style="width:65px; text-align:center;" min="1" placeholder="#">
+                                    <button class="btn-premium px-3 py-1" onclick="goToUsersPage()" style="font-size:0.8rem;">Go</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="main-activity-view" class="d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="h4 font-bold mb-0">Security Logs</h3>
+                            <div class="small text-muted" id="logs-info">Real-time event stream</div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-dark-custom align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="small text-muted border-0" style="width: 180px;">Timestamp</th>
+                                        <th class="small text-muted border-0" style="width: 140px;">Action</th>
+                                        <th class="small text-muted border-0">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logs-table-body">
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5 text-muted">Scanning security logs...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-bar mt-4 pt-3 border-top border-white-10">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button id="logs-first-btn" class="btn-icon-premium" onclick="firstLogsPage()" title="First Page">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </button>
+                                    <button id="logs-prev-btn" class="btn-icon-premium" onclick="prevLogsPage()" title="Previous Page">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <div class="badge-premium mx-2" id="logs-page-info">Page 1</div>
+                                    <button id="logs-next-btn" class="btn-icon-premium" onclick="nextLogsPage()" title="Next Page">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <button id="logs-last-btn" class="btn-icon-premium" onclick="lastLogsPage()" title="Last Page">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </button>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="text-muted small">Jump to:</span>
+                                    <input type="number" id="logs-goto-input" class="form-control form-control-sm glass-deep border-0 rounded-xl" 
+                                           style="width:65px; text-align:center;" min="1" placeholder="#">
+                                    <button class="btn-premium px-3 py-1" onclick="goToLogsPage()" style="font-size:0.8rem;">Go</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="glass p-4 rounded-3xl h-100">
+                    <h3 class="h4 font-bold mb-4">System Utilities</h3>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="insight-card p-4 glass-deep rounded-2xl border-glow">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small font-bold text-primary-light uppercase">Engine Status</span>
+                                <i class="fas fa-cogs text-primary-light"></i>
+                            </div>
+                            <p class="small text-muted mb-3">Run diagnostic cycles to optimize database indexing and performance metrics.</p>
+                            <button class="btn-premium py-2 w-100 small" onclick="runMaintenance()">Diagnostic Wipe</button>
+                        </div>
+
+                        <div class="insight-card p-4 glass-deep rounded-2xl">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small font-bold text-warning uppercase">Persistence</span>
+                                <i class="fas fa-shield-alt text-warning"></i>
+                            </div>
+                            <p class="small text-muted mb-3">Generate encryption-sealed backups of the entire threat database and user records.</p>
+                            <button class="btn-outline-premium py-2 w-100 small" onclick="createBackup()">System Snapshot</button>
+                        </div>
+
+                        <div class="insight-card p-4 glass-deep rounded-2xl">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small font-bold text-danger uppercase">Cache Management</span>
+                                <i class="fas fa-broom text-danger"></i>
+                            </div>
+                            <p class="small text-muted mb-3">Flush temporary computational tokens and reload detection definitions.</p>
+                            <button class="btn-outline-premium border-danger text-danger py-2 w-100 small" onclick="clearCache()">Flush Cache</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- Modals -->
+    <div id="addUserModal" class="modal-overlay d-none">
+        <div class="glass p-5 rounded-3xl max-w-lg mx-auto shadow-2xl">
+            <h3 class="h4 font-bold mb-1">Register New User</h3>
+            <p class="text-muted small mb-4">Provision a new secure account in the system directory.</p>
+            <form id="addUserForm" class="d-flex flex-column gap-3">
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Username</label>
+                    <input type="text" id="newUsername" name="username" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" placeholder="e.g. john_doe" required>
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Email</label>
+                    <input type="email" id="newEmail" name="email" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" placeholder="e.g. user@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Password</label>
+                    <input type="password" id="newPassword" name="password" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" placeholder="Min 6 characters" required>
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Role</label>
+                    <select id="newRole" name="role" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-3 mt-3">
+                    <button type="button" class="btn-outline-premium w-100" onclick="closeModal('addUserModal')">Cancel</button>
+                    <button type="button" class="btn-premium w-100" onclick="submitNewUser()">Register</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editUserModal" class="modal-overlay d-none">
+        <div class="glass p-5 rounded-3xl max-w-lg mx-auto shadow-2xl">
+            <h3 class="h4 font-bold mb-1">Edit Directory Member</h3>
+            <p class="text-muted small mb-4">Modify account permissions and profile metadata.</p>
+            <form id="editUserForm" class="d-flex flex-column gap-3">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Username</label>
+                    <input type="text" id="editUsername" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" required>
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Email</label>
+                    <input type="email" id="editEmail" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" required>
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">New Password (optional)</label>
+                    <input type="password" id="editPassword" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);" placeholder="Leave blank to keep current">
+                </div>
+                <div class="form-group">
+                    <label class="small uppercase font-bold text-muted mb-1">Permission Level</label>
+                    <select id="editRole" class="glass-deep p-3 rounded-xl w-100" style="color:var(--text-main);">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-3 mt-3">
+                    <button type="button" class="btn-outline-premium w-100" onclick="closeModal('editUserModal')">Cancel</button>
+                    <button type="button" class="btn-premium w-100" onclick="submitEditUser()">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay d-none">
+        <div class="glass p-5 rounded-3xl max-w-md mx-auto text-center shadow-2xl mt-5">
+            <i class="fas fa-exclamation-triangle text-danger fa-3x mb-4"></i>
+            <h3 class="h4 font-bold mb-2" id="confirmTitle">Permission Required</h3>
+            <p class="text-muted mb-4" id="confirmMessage">This action creates a permanent shift in the data structure. Proceed?</p>
+            <div class="d-flex gap-3 mt-4">
+                <button class="btn-outline-premium w-100" onclick="closeModal('confirmModal')">Abort</button>
+                <button id="confirmBtn" class="btn-premium bg-danger border-danger w-100 text-white">Authorize</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal-overlay d-none">
+        <div class="glass p-5 rounded-3xl max-w-md mx-auto text-center shadow-2xl mt-5">
+            <i class="fas fa-info-circle text-primary-light fa-3x mb-4"></i>
+            <h3 class="h4 font-bold mb-2" id="alertTitle">System Notice</h3>
+            <p class="text-muted mb-4" id="alertMessage"></p>
+            <button class="btn-premium w-100" onclick="closeModal('alertModal')">Acknowledge</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const creds = localStorage.getItem('system_auth');
+            const user = JSON.parse(localStorage.getItem('system_user') || 'null');
+            if (!creds || !user) {
+                window.location.href = '/login';
+                return;
+            }
+            if (!user.is_admin) {
+                window.location.href = '/dashboard';
+                return;
+            }
+            
+            // Set user greeting
+            const greeting = document.getElementById('user-greeting');
+            if (greeting) {
+                greeting.textContent = `Overseer: ${user.name}`;
+                greeting.classList.remove('d-none');
+            }
+            
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.style.display = 'inline-block';
+                logoutBtn.addEventListener('click', () => {
+                    if (typeof handleLogout === 'function') {
+                        handleLogout();
+                    } else {
+                        localStorage.removeItem('system_auth');
+                        localStorage.removeItem('system_user');
+                        window.location.href = '/login';
+                    }
+                });
+            }
+
+            // Setup search functionality
+            const userSearch = document.getElementById('user-search');
+            if (userSearch) {
+                userSearch.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') searchUsers();
+                });
+            }
+        });
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('d-none');
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('d-none');
+                modal.style.display = 'none';
+                if (modalId === 'addUserModal') {
+                    document.getElementById('addUserForm').reset();
+                }
+            }
+        }
+
+
+
+        function toggleAdminView() {
+            const usersView = document.getElementById('main-users-view');
+            const logsView = document.getElementById('main-activity-view');
+            const btn = document.getElementById('toggle-view-btn');
+            const creds = localStorage.getItem('system_auth');
+            
+            if (usersView.classList.contains('d-none')) {
+                usersView.classList.remove('d-none');
+                logsView.classList.add('d-none');
+                btn.innerHTML = '<i class="fas fa-chart-line me-2"></i> Show Activity';
+            } else {
+                usersView.classList.add('d-none');
+                logsView.classList.remove('d-none');
+                btn.innerHTML = '<i class="fas fa-users me-2"></i> User Management';
+                if (typeof loadLogs === 'function') loadLogs(creds);
+            }
+        }
+
+        // Custom Alert/Confirm wrappers for existing admin.js calls
+        function customAlert(title, message) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').textContent = message;
+            openModal('alertModal');
+        }
+
+        function customConfirm(title, message, onConfirm) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.onclick = () => {
+                closeModal('confirmModal');
+                if (onConfirm) onConfirm();
+            };
+            openModal('confirmModal');
+        }
+
+        async function submitNewUser() {
+            const creds = localStorage.getItem('system_auth');
+            const form = document.getElementById('addUserForm');
+            const username = document.getElementById('newUsername').value;
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newRole').value;
+
+            if (!username || !email || !password) {
+                showToast('Identification fields required', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + creds
+                    },
+                    body: JSON.stringify({username, email, password, role})
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Initialization failed');
+                
+                showToast('Personnel registered successfully', 'success');
+                closeModal('addUserModal');
+                if (typeof refreshUsers === 'function') refreshUsers();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Maintenance functions
+        function runMaintenance() {
+            showToast('Initiating diagnostic cycle...', 'info');
+            setTimeout(() => showToast('Optimization sequence complete', 'success'), 2000);
+        }
+
+        function clearCache() {
+            showToast('Flushing temporary tokens...', 'info');
+            setTimeout(() => showToast('Cache clear successful', 'success'), 1500);
+        }
+
+        function createBackup() {
+            showToast('Generating system snapshot...', 'info');
+            setTimeout(() => showToast('Snapshot secured and downloaded', 'success'), 2500);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+        <footer class="text-center mt-5">
+            <div class="container">
+                <p class="footer-highlight mb-0">Beautifully made with <span class="footer-heart">♥</span> by
+                    <a href="https://github.com/Nikit-370/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Nikit Singh Kanyal</a>
+                    and
+                    <a href="https://github.com/Vaibhav-1922/" target="_blank" rel="noopener noreferrer" class="footer-link"><i class="fab fa-github me-1"></i>Vaibhav Vishwakarma</a>
+                </p>
+                <p class="footer-subtext small mt-1">Click a name to visit their GitHub and explore more projects.</p>
+                <!-- <p class="small mt-2">MCA final year project</p> -->
+                <div class="mt-3 d-flex justify-content-center gap-4">
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('privacyModal'); return false;} window.location.href='/';">Privacy Policy</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('termsModal'); return false;} window.location.href='/';">Terms of Service</a>
+                    <a href="#" class="nav-link" onclick="if(typeof openFooterModal==='function'){openFooterModal('apiDocsModal'); return false;} window.location.href='/';">API Docs</a>
+                </div>
+                <p class="small mt-2 footer-copy">&copy; PhishGuard 2026. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <!-- Footer styles are centralized in static/css/style.css (.footer-highlight, .footer-subtext, .footer-link) -->
+</body>
+</html>
