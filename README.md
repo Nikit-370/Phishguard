@@ -115,10 +115,6 @@ POST /api/detect
 
 **For comprehensive setup, API documentation, and deployment instructions, please refer to the documentation links above.**
 
-If you want, I can add step-by-step instructions to configure a managed database (Postgres/Supabase) and update the app to use it.
-
-If you want, I can now update `docs/SETUP.md` and `PROJECT_STRUCTURE.md` to match these exact commands and the pinned dependencies in `requirements.txt`.
-
 ### 4. Run the Application
 
 ```bash
@@ -239,9 +235,6 @@ This project uses SQLite for local development and an environment-aware path for
 Important caveats:
 - Vercel's filesystem is ephemeral. Files written to `/tmp` are temporary and not suitable for persistent production storage. Data will be lost between deployments or cold starts.
 - Multiple instances/functions do not share the same `/tmp` file. Concurrent or scaled deployments will have inconsistent local state.
-
-Recommendations:
-- For production use, switch to a managed database (Postgres, MySQL, Vercel Postgres, Supabase). You can then set a `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` environment variable and update `app.py` to use it instead of SQLite. I can add this optional fallback if you'd like.
 - The app also supports an explicit `DATABASE_URL` or `SQLALCHEMY_DATABASE_URI` environment variable. If set, the application will use that value preferentially. If initialization fails (bad URL or filesystem errors), the app will attempt to fall back to an in-memory SQLite database to keep the app running for testing.
 - Use SQLite only for local development, demos, or small single-instance deployments.
 
@@ -327,5 +320,3 @@ Notes:
 ## 📝 License
 
 This project is released under the MIT License — see the `LICENSE` file in the repository for the full text. In short, you are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, provided that the original copyright and license notice are included in all copies or substantial portions of the Software.
-
-If you want I can also add the full `LICENSE` file to the repo now.
